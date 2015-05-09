@@ -11,7 +11,7 @@ namespace import configurator::*
 
 
 namespace eval parcel {
-  variable mounts [dict create]
+  variable imports [dict create]
 }
 
 
@@ -20,7 +20,7 @@ proc parcel::getConfig {filename} {
     set set
   }
   set slaveCmds {
-    mount parcel::mount
+    import parcel::import
   }
 
   set fd [open $filename r]
@@ -30,26 +30,27 @@ proc parcel::getConfig {filename} {
 }
 
 
-proc parcel::mount {interp files mountPoint} {
-  variable mounts
-  dict set mounts $mountPoint $files
+proc parcel::import {interp files importPoint} {
+  variable imports
+  dict set imports $importPoint $files
 }
 
 
 proc parcel::encodeFiles {} {
-  variable mounts
+  variable imports
 
   set encodedFiles [dict create]
 
-  dict for {mountPoint files} $mounts {
+  dict for {importPoint files} $imports {
     foreach filename $files {
+      set filenameWithoutDir [file tail $filename]
+      set importedFilename [file join $importPoint $filenameWithoutDir]
       set fd [open $filename r]
       set contents [read $fd]
       close $fd
-      set mountedFilename [file join $mountPoint $filename]
 # TODO: Fix encoding for non ascii input
 # TODO: Catch any errors
-      dict set encodedFiles $mountedFilename [::base64::encode $contents]
+      dict set encodedFiles $importedFilename [::base64::encode $contents]
     }
   }
 
