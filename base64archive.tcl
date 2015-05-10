@@ -25,9 +25,28 @@ package require base64
 
   method importFiles {_files importPoint} {
     foreach filename $_files {
-      # TODO: Make sure file is a file and not a dir
-      set filenameWithoutDir [file tail $filename]
-      set importedFilename [file join $importPoint $filenameWithoutDir]
+      if {![my IsValidImportFilename $filename]} {
+        return -code error "can't import file: $filename"
+      }
+      set importedFilename [
+        my RemoveDotFromFilename [file join $importPoint $filename]
+      ]
+      set fd [open $filename r]
+      set contents [read $fd]
+      close $fd
+      dict set files $importedFilename $contents
+    }
+  }
+
+
+  method fetchFiles {_files importPoint} {
+    foreach filename $_files {
+      if {![my IsValidFetchFilename $filename]} {
+        return -code error "can't fetch file: $filename"
+      }
+      set importedFilename [
+        my RemoveDotFromFilename [file join $importPoint [file tail $filename]]
+      ]
       set fd [open $filename r]
       set contents [read $fd]
       close $fd
@@ -78,4 +97,43 @@ package require base64
     }
   }
 
+
+  method RemoveDotFromFilename {filename} {
+    set splitFilename [file split $filename]
+    set outFilename [list]
+
+    foreach e $splitFilename {
+      if {$e ne "."} {
+        lappend outFilename $e
+      }
+    }
+
+    return [file join {*}$outFilename]
+  }
+
+
+  method IsValidImportFilename {filename} {
+    if {![file isfile $filename]} {
+      return 0
+    }
+
+    set splitFilename [file split $filename]
+
+    foreach e $splitFilename {
+      if {$e eq ".."} {
+        return 0
+      }
+    }
+
+    return 1
+  }
+
+
+  method IsValidFetchFilename {filename} {
+    if {![file isfile $filename]} {
+      return 0
+    }
+
+    return 1
+  }
 }

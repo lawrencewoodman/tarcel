@@ -34,6 +34,7 @@ proc parcel::GetConfig {filename} {
   }
   set slaveCmds {
     import parcel::Import
+    fetch parcel::Fetch
   }
 
   set fd [open $filename r]
@@ -46,6 +47,12 @@ proc parcel::GetConfig {filename} {
 proc parcel::Import {interp files importPoint} {
   variable archive
   $archive importFiles $files $importPoint
+}
+
+
+proc parcel::Fetch {interp files importPoint} {
+  variable archive
+  $archive fetchFiles $files $importPoint
 }
 
 

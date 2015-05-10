@@ -74,17 +74,23 @@ proc launcher::source {args} {
   set filename $argsLeft
   set contents [pvfs::read $filename]
   if {$contents ne {}} {
+    set callingScript [info script]
     info script $filename
     if {[dict exist $switches -encoding]} {
-      uplevel 1 [
-        encoding convertfrom [dict get $switches -encoding] $contents
+      set res [
+        uplevel 1 [
+          encoding convertfrom [dict get $switches -encoding] $contents
+        ]
       ]
     } else {
-      uplevel 1 $contents
+      set res [uplevel 1 $contents]
     }
+    info script $callingScript
   } else {
-    uplevel 1 ::launcher::realSource {*}$args
+    set res [uplevel 1 ::launcher::realSource {*}$args]
   }
+
+  return $res
 }
 
 
