@@ -5,9 +5,7 @@
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
 namespace eval embeddedChan {
-  variable readWatch 0
-# TODO: Change name of encodedContents as not really encoded anymore
-  variable chanEncodedContents [dict create]
+  variable files [dict create]
   variable supportedSubCommands {
     initialize
     finalize
@@ -23,14 +21,16 @@ namespace eval embeddedChan {
   namespace ensemble create -subcommands {}
 }
 
-proc embeddedChan::open {encodedContents} {
-  variable chanEncodedContents
+proc embeddedChan::open {contents} {
+  variable files
   set chanid [chan create read [namespace current]]
-  dict set chanEncodedContents $chanid [
+
+  dict set files $chanid [
     dict create pos 0 \
                 readWatch 0 \
-                encodedContents [::base64::decode $encodedContents]
+                contents $contents
   ]
+
   return $chanid
 }
 
@@ -57,36 +57,36 @@ proc embeddedChan::initialize {chanid mode} {
 }
 
 proc embeddedChan::finalize {chanid} {
-  variable chanEncodedContents
+  variable files
 
-  dict unset chanEncodedContents $chanid
+  dict unset files $chanid
 }
 
 
 proc embeddedChan::watch {chanid events} {
-  variable chanEncodedContents
+  variable files
 
   puts [info level 0]
   if {$read in $events} {
-    dict set chanEncodedContents $chanid readWatch 1
+    dict set files $chanid readWatch 1
   } else {
-    dict set chanEncodedContents $chanid readWatch 0
+    dict set files $chanid readWatch 0
   }
 }
 
 
 proc embeddedChan::read {chanid count} {
-  variable chanEncodedContents
-  set pos [dict get $chanEncodedContents $chanid pos]
+  variable files
+  set pos [dict get $files $chanid pos]
   set result [
-    string range [dict get $chanEncodedContents $chanid encodedContents] \
+    string range [dict get $files $chanid contents] \
                  $pos \
                  $pos+$count
   ]
 
-  dict set chanEncodedContents $chanid pos [expr {$pos + $count + 1}]
+  dict set files $chanid pos [expr {$pos + $count + 1}]
 
-  if {[dict get $chanEncodedContents $chanid readWatch]} {
+  if {[dict get $files $chanid readWatch]} {
     chan postevent $chanid read
   }
 

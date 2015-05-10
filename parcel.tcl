@@ -9,18 +9,31 @@ package require base64
 package require configurator
 namespace import configurator::*
 
+set ThisScriptDir [file dirname [info script]]
+source [file join $ThisScriptDir base64archive.tcl]
+
 
 namespace eval parcel {
-  variable imports [dict create]
+  variable archive [Base64Archive new]
 }
 
 
-proc parcel::getConfig {filename} {
+proc parcel::main {manifestFilename} {
+  set files [GetConfig $manifestFilename]
+  Compile fred.tcl
+}
+
+
+#################################
+# Internal commands
+#################################
+
+proc parcel::GetConfig {filename} {
   set exposeCmds {
     set set
   }
   set slaveCmds {
-    import parcel::import
+    import parcel::Import
   }
 
   set fd [open $filename r]
@@ -30,43 +43,13 @@ proc parcel::getConfig {filename} {
 }
 
 
-proc parcel::import {interp files importPoint} {
-  variable imports
-  dict set imports $importPoint $files
+proc parcel::Import {interp files importPoint} {
+  variable archive
+  $archive importFiles $files $importPoint
 }
 
 
-proc parcel::encodeFiles {} {
-  variable imports
-
-  set encodedFiles [dict create]
-
-  dict for {importPoint files} $imports {
-    foreach filename $files {
-      set filenameWithoutDir [file tail $filename]
-      set importedFilename [file join $importPoint $filenameWithoutDir]
-      set fd [open $filename r]
-      set contents [read $fd]
-      close $fd
-# TODO: Fix encoding for non ascii input
-# TODO: Catch any errors
-      dict set encodedFiles $importedFilename [::base64::encode $contents]
-    }
-  }
-
-  return $encodedFiles
-}
-
-
-proc parcel::putsEncodedFilesSetLine {encodedFiles} {
-  puts "set encodedFiles \{"
-  dict for {filename encoding} $encodedFiles {
-    puts "  $filename \{$encoding\}"
-  }
-  puts "\}\n\n"
-}
-
-proc parcel::putsFile {filename} {
+proc parcel::PutsFile {filename} {
   set fd [open $filename r]
   puts "\n\n"
   puts [read $fd]
@@ -75,17 +58,19 @@ proc parcel::putsFile {filename} {
 }
 
 
-proc parcel::compile {encodedFiles outFilename} {
-  putsEncodedFilesSetLine $encodedFiles
-  putsFile "embeddedchan.tcl"
-  putsFile "launcher.tcl"
-  puts "launcher::init \$encodedFiles"
-  puts "source [lindex $encodedFiles 0]"
+proc parcel::Compile {outFilename} {
+  variable archive
+  puts [$archive export encodedFiles]
+  PutsFile "embeddedchan.tcl"
+  PutsFile "base64archive.tcl"
+  PutsFile "pvfs.tcl"
+  PutsFile "launcher.tcl"
+  puts "pvfs::mount \[Base64Archive new \$encodedFiles\] ."
+  puts "launcher::init"
+  puts "source [lindex [$archive ls] 0]"
   puts "launcher::finish"
 }
 
 
-lassign $argv filename
-set files [parcel::getConfig $filename]
-set encodedFiles [parcel::encodeFiles]
-parcel::compile $encodedFiles fred.tcl
+lassign $argv manifestFilename
+parcel::main $manifestFilename

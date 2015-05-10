@@ -7,24 +7,25 @@ set ThisScriptDir [file dirname [info script]]
 set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
 source [file join $ThisScriptDir .. "embeddedchan.tcl"]
+source [file join $ThisScriptDir .. "base64archive.tcl"]
+source [file join $ThisScriptDir .. "pvfs.tcl"]
 source [file join $ThisScriptDir .. "launcher.tcl"]
 
 
 test source-1 {Ensure that info script returns correct location when an encoded file sourced} -setup {
   set infoScriptScript {
-    set ret [info script]
+    info script
   }
-  set encodedFiles [
-    dict create lib/app/info_script.tcl \
-                [::base64::encode $infoScriptScript]
-  ]
-  launcher::init $encodedFiles
+
+  set archive [Base64Archive new]
+  $archive importContents $infoScriptScript [file join lib app info_script.tcl]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
-  source lib/app/info_script.tcl
-  set ret
+  source [file join lib app info_script.tcl]
 } -cleanup {
   launcher::finish
-} -result {lib/app/info_script.tcl}
+} -result [file join lib app info_script.tcl]
 
 
 test source-2 {Ensure that package require for a module outside of the parcel works in the correct namespace} -setup {
@@ -34,13 +35,12 @@ test source-2 {Ensure that package require for a module outside of the parcel wo
     hello fred
   }
   ::tcl::tm::path add $FixturesDir
-  set encodedFiles [
-    dict create lib/app/main.tcl \
-                [::base64::encode $mainScript]
-  ]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $mainScript [file join lib app main.tcl]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
-  source lib/app/main.tcl
+  source [file join lib app main.tcl]
 } -cleanup {
   launcher::finish
   namespace forget greeterExternal::*
@@ -67,14 +67,14 @@ test source-3 {Ensure that package require for a module inside the parcel works 
   }
 
   ::tcl::tm::path add [file join lib modules]
-  set encodedFiles [
-    dict create lib/app/main.tcl [::base64::encode $mainScript] \
-                lib/modules/greeterInternal-0.1.tm \
-                  [::base64::encode $greeterInternalScript]
-  ]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $mainScript [file join lib app main.tcl]
+  $archive importContents $greeterInternalScript \
+                          [file join lib modules greeterInternal-0.1.tm]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
-  source lib/app/main.tcl
+  source [file join lib app main.tcl]
 } -cleanup {
   launcher::finish
   namespace forget greeterInternal::*
@@ -87,13 +87,12 @@ test open-1 {Ensure that read works correctly for files when no count given} -se
     This is a very nice day
     oh yes it is
   }
-  set encodedFiles [
-    dict create text/nice_day.txt \
-                [::base64::encode $niceDayText]
-  ]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $niceDayText [file join text nice_day.txt]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
-  set fd [open "text/nice_day.txt" r]
+  set fd [open [file join text nice_day.txt] r]
   set result [read $fd]
   close $fd
   set result
@@ -107,14 +106,13 @@ test open-1 {Ensure that read works correctly for files when no count given} -se
 
 test open-2 {Ensure that read works correct for files when count given} -setup {
   set niceDayText {This is a very nice day}
-  set encodedFiles [
-    dict create text/nice_day.txt \
-                [::base64::encode $niceDayText]
-  ]
   set result [list]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $niceDayText [file join text nice_day.txt]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
-  set fd [open "text/nice_day.txt" r]
+  set fd [open [file join text nice_day.txt] r]
   lappend result [read $fd 7]
   lappend result [read $fd 6]
   lappend result [read $fd 20]
@@ -126,17 +124,16 @@ test open-2 {Ensure that read works correct for files when count given} -setup {
 } -result {{This is} { a ver} {y nice day} {}}
 
 
-test open-2 {Ensure that gets works correctly for files} -setup {
+test open-3 {Ensure that gets works correctly for files} -setup {
   set niceDayText {This is a very nice day
     and so is this}
-  set encodedFiles [
-    dict create text/nice_day.txt \
-                [::base64::encode $niceDayText]
-  ]
   set result [list]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $niceDayText [file join text nice_day.txt]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
-  set fd [open "text/nice_day.txt" r]
+  set fd [open [file join text nice_day.txt] r]
   lappend result [gets $fd]
   lappend result [gets $fd]
   lappend result [gets $fd]
@@ -156,12 +153,12 @@ test file-exists-1 {Ensure that 'file exists' finds directories within directory
       return "hello"
     }
   }
-  set encodedFiles [
-    dict create lib/app/main.tcl [::base64::encode $mainScript] \
-                lib/modules/greeterInternal-0.1.tm \
-                  [::base64::encode $greeterInternalScript]
-  ]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $mainScript [file join lib app main.tcl]
+  $archive importContents $greeterInternalScript \
+                          [file join lib modules greeterInternal-0.1.tm]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
   file exists [file join lib modules]
 } -cleanup {
@@ -178,12 +175,12 @@ test file-exists-2 {Ensure that 'file exists' returns when files aren't found} -
       return "hello"
     }
   }
-  set encodedFiles [
-    dict create lib/app/main.tcl [::base64::encode $mainScript] \
-                lib/modules/greeterInternal-0.1.tm \
-                  [::base64::encode $greeterInternalScript]
-  ]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $mainScript [file join lib app main.tcl]
+  $archive importContents $greeterInternalScript \
+                          [file join lib modules greeterInternal-0.1.tm]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
   file exists [file join lib modules bob]
 } -cleanup {
@@ -200,12 +197,12 @@ test glob-1 {Ensure that glob -directory works on encoded files} -setup {
       return "hello"
     }
   }
-  set encodedFiles [
-    dict create lib/app/main.tcl [::base64::encode $mainScript] \
-                lib/modules/greeterInternal-0.1.tm \
-                  [::base64::encode $greeterInternalScript]
-  ]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $mainScript [file join lib app main.tcl]
+  $archive importContents $greeterInternalScript \
+                          [file join lib modules greeterInternal-0.1.tm]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
   glob -directory [file join lib modules] *.tm
 } -cleanup {
@@ -222,12 +219,12 @@ test glob-2 {Ensure that glob -directory works with -nocomplain} -setup {
       return "hello"
     }
   }
-  set encodedFiles [
-    dict create lib/app/main.tcl [::base64::encode $mainScript] \
-                lib/modules/greeterInternal-0.1.tm \
-                  [::base64::encode $greeterInternalScript]
-  ]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $mainScript [file join lib app main.tcl]
+  $archive importContents $greeterInternalScript \
+                          [file join lib modules greeterInternal-0.1.tm]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
   glob -nocomplain -directory [file join lib modules] *.fred
 } -cleanup {
@@ -244,12 +241,12 @@ test glob-3 {Ensure that glob -directory complains if nothing found and -nocompl
       return "hello"
     }
   }
-  set encodedFiles [
-    dict create lib/app/main.tcl [::base64::encode $mainScript] \
-                lib/modules/greeterInternal-0.1.tm \
-                  [::base64::encode $greeterInternalScript]
-  ]
-  launcher::init $encodedFiles
+  set archive [Base64Archive new]
+  $archive importContents $mainScript [file join lib app main.tcl]
+  $archive importContents $greeterInternalScript \
+                          [file join lib modules greeterInternal-0.1.tm]
+  pvfs::mount $archive .
+  launcher::init
 } -body {
   glob -directory [file join lib modules] *.fred
 } -cleanup {

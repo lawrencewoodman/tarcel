@@ -7,16 +7,11 @@
 package require base64
 
 namespace eval launcher {
-  variable encodedFiles
   namespace export open source file glob
 }
 
 
-proc launcher::init {_encodedFiles} {
-  variable encodedFiles
-
-  set encodedFiles $_encodedFiles
-
+proc launcher::init {} {
   rename ::open ::launcher::realOpen
   rename ::source ::launcher::realSource
   rename ::file ::launcher::realFile
@@ -60,7 +55,7 @@ proc launcher::file {args} {
   lassign $args command
 
   if {$command eq "exists" && [llength $args] == 2} {
-    if {[FileExists [lindex $args 1]]} {
+    if {[pvfs::exists [lindex $args 1]]} {
       return 1
     }
   }
@@ -69,8 +64,6 @@ proc launcher::file {args} {
 
 
 proc launcher::source {args} {
-  variable encodedFiles
-
   set switchesWithValue {-encoding}
   lassign [GetSwitches $switchesWithValue {} {*}$args] switches argsLeft
 
@@ -79,16 +72,15 @@ proc launcher::source {args} {
   }
 
   set filename $argsLeft
-  set encoding [GetEncodedFile $filename]
-  if {$encoding ne {}} {
+  set contents [pvfs::read $filename]
+  if {$contents ne {}} {
     info script $filename
-    set decodedSource [::base64::decode $encoding]
     if {[dict exist $switches -encoding]} {
       uplevel 1 [
-        encoding convertfrom [dict get $switches -encoding] $decodedSource
+        encoding convertfrom [dict get $switches -encoding] $contents
       ]
     } else {
-      uplevel 1 [::base64::decode $encoding]
+      uplevel 1 $contents
     }
   } else {
     uplevel 1 ::launcher::realSource {*}$args
@@ -97,11 +89,10 @@ proc launcher::source {args} {
 
 
 proc launcher::open {args} {
-  variable encodedFiles
   lassign $args filename
-  set encoding [GetEncodedFile $filename]
-  if {$encoding ne {}} {
-    return [embeddedChan::open $encoding]
+  if {[pvfs::exists $filename]} {
+    set contents [pvfs::read $filename]
+    return [embeddedChan::open $contents]
   } else {
     ::launcher::realOpen {*}$args
   }
@@ -138,52 +129,33 @@ proc launcher::finish {} {
 ########################
 
 proc launcher::GlobInDir {switches directory patterns} {
-  variable encodedFiles
-
   set directory [file split [file normalize $directory]]
   set lastDirectoryPartIndex [expr {[llength $directory] - 1}]
   set result [list]
 
-  dict for {encodedFilename encoding} $encodedFiles {
-    set splitEncodedFilename [file split [file normalize $encodedFilename]]
+  set vFilenames [pvfs::ls]
+  foreach vFilename $vFilenames {
+    set splitVFilename [file split [file normalize $vFilename]]
     set possibleCommonDir [
-      lrange $splitEncodedFilename 0 $lastDirectoryPartIndex
+      lrange $splitVFilename 0 $lastDirectoryPartIndex
     ]
 
     if {$directory == $possibleCommonDir} {
       set comparePart [
-        file join [lrange $splitEncodedFilename \
+        file join [lrange $splitVFilename \
                           [expr {$lastDirectoryPartIndex+1}] \
                           end]
       ]
 
       foreach pattern $patterns {
         if {[string match $pattern $comparePart]} {
-          lappend result $encodedFilename
+          lappend result $vFilename
         }
       }
     }
   }
 
   return $result
-}
-
-
-proc launcher::FileExists {name} {
-  variable encodedFiles
-
-  set normalizedSplitName [file split [file normalize $name]]
-  set lastNamePartIndex [expr {[llength $normalizedSplitName] - 1}]
-
-  dict for {encodedFilename encoding} $encodedFiles {
-    set splitEncodedFilename [file split [file normalize $encodedFilename]]
-    if {$normalizedSplitName ==
-        [lrange $splitEncodedFilename 0 $lastNamePartIndex]} {
-      return 1
-    }
-  }
-
-  return 0
 }
 
 
