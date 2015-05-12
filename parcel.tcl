@@ -44,7 +44,6 @@ proc parcel::PutsFile {filename} {
 proc parcel::Compile {outFilename} {
   global LibDir
   variable archive
-  variable additionalModulePaths
 
   puts [[config::getArchive] export encodedFiles]
   PutsFile [file join $LibDir embeddedchan.tcl]
@@ -53,11 +52,6 @@ proc parcel::Compile {outFilename} {
   PutsFile [file join $LibDir launcher.tcl]
   puts "pvfs::mount \[Base64Archive new \$encodedFiles\] ."
   puts "launcher::init"
-  foreach additionalModulePath [config::getAdditionalModulePaths] {
-    puts -nonewline "::tcl::tm::path add "
-    puts -nonewline "\[file join \[file dirname \[info script\]\] "
-    puts "$additionalModulePath\]"
-  }
   puts [config::getInitScript]
   puts "launcher::finish"
 }

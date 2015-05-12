@@ -7,10 +7,15 @@ set appFiles [list \
   [file join lib embeddedchan.tcl]
 ]
 
+set modules [list \
+  [find module configurator]
+]
+
 import $appFiles lib/app
-add module configurator modules
-add modulePath modules
+fetch $modules modules
+
 
 init {
+  ::tcl::tm::path add modules
   source [file join lib app parcel.tcl]
 }

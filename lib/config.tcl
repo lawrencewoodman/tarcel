@@ -9,7 +9,6 @@ namespace eval config {
   source [file join $ThisScriptDir base64archive.tcl]
 
   variable archive [Base64Archive new]
-  variable additionalModulePaths [list]
   variable initScript {}
 }
 
@@ -20,9 +19,9 @@ proc config::load {filename} {
     set set
   }
   set slaveCmds {
-    add config::Add
     fetch config::Fetch
     file config::File
+    find config::Find
     import config::Import
     init config::Init
   }
@@ -83,19 +82,18 @@ proc config::File {interp command args} {
 }
 
 
-proc config::Add {interp type args} {
+proc config::Find {interp type args} {
   switch $type {
-    module { AddModule {*}$args }
-    modulePath { AddModulePath {*}$args }
+    module { FindModule {*}$args }
     default {
-      return -code error "unknown add type: $type"
+      return -code error "unknown find type: $type"
     }
   }
 }
 
 
 # TODO: Add version number handling
-proc config::AddModule {args} {
+proc config::FindModule {args} {
   variable archive
   lassign $args moduleName destination
   set dirPrefix [regsub {^(.*?)([^:]+)$} $moduleName {\1}]
@@ -112,22 +110,14 @@ proc config::AddModule {args} {
     foreach moduleFilename $possibleModules {
       set tailFoundModule [file tail $moduleFilename]
       set version [regsub {^(.*?)-(.*?)\.tm$} $tailFoundModule {\2}]
-      lappend foundModules [list $moduleFilename $tailFoundModule $version]
+      lappend foundModules [list $moduleFilename $version]
     }
   }
 
   if {[llength $foundModules] == 0} {
     return -code error "Module can't be found: $moduleName"
   }
-  set latestModule [lindex [lsort -decreasing -index 2 $foundModules] 0]
-  lassign $latestModule fullModuleFilename tailModuleName
-  set importPoint [file join $destination $dirPrefix]
-  $archive fetchFiles [list $fullModuleFilename] $importPoint
-}
-
-
-proc config::AddModulePath {args} {
-  variable additionalModulePaths
-
-  set additionalModulePaths [list {*}$additionalModulePaths {*}$args]
+  set latestModule [lindex [lsort -decreasing -index 1 $foundModules] 0]
+  lassign $latestModule fullModuleFilename
+  return $fullModuleFilename
 }
