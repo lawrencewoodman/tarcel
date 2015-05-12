@@ -4,7 +4,6 @@
 #
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
-package require base64
 
 namespace eval launcher {
   namespace export open source file glob
