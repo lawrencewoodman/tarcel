@@ -1,0 +1,10 @@
+set appFiles {
+  parcel.tcl
+  launcher.tcl
+  base64archive.tcl
+  embeddedchan.tcl
+}
+
+import $appFiles lib/app
+add module configurator modules
+add modulePath modules
