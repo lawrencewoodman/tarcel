@@ -1,3 +1,9 @@
+# Config handler
+#
+# Copyright (C) 2015 Lawrence Woodman <lwoodman@vlifesystems.com>
+#
+# Licensed under an MIT licence.  Please see LICENCE.md for details.
+#
 namespace eval config {
   set ThisScriptDir [file dirname [info script]]
   source [file join $ThisScriptDir base64archive.tcl]
