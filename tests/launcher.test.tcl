@@ -4,12 +4,13 @@ namespace import tcltest::*
 
 # Add module dir to tm paths
 set ThisScriptDir [file dirname [info script]]
+set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
-source [file join $ThisScriptDir .. "embeddedchan.tcl"]
-source [file join $ThisScriptDir .. "base64archive.tcl"]
-source [file join $ThisScriptDir .. "pvfs.tcl"]
-source [file join $ThisScriptDir .. "launcher.tcl"]
+source [file join $LibDir "embeddedchan.tcl"]
+source [file join $LibDir "base64archive.tcl"]
+source [file join $LibDir "pvfs.tcl"]
+source [file join $LibDir "launcher.tcl"]
 
 
 test source-1 {Ensure that info script returns correct location when an encoded file sourced} -setup {

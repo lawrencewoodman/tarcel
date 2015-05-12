@@ -4,9 +4,10 @@ namespace import tcltest::*
 
 # Add module dir to tm paths
 set ThisScriptDir [file dirname [info script]]
+set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file join $ThisScriptDir fixtures]
 
-source [file join $ThisScriptDir .. "base64archive.tcl"]
+source [file join $LibDir "base64archive.tcl"]
 
 
 test importFiles-1 {Ensure that files are put in correct location relative to their current location} -setup {

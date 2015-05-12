@@ -1,10 +1,16 @@
-set appFiles {
-  parcel.tcl
-  launcher.tcl
-  base64archive.tcl
-  embeddedchan.tcl
-}
+set appFiles [list \
+  parcel.tcl \
+  [file join lib launcher.tcl] \
+  [file join lib config.tcl] \
+  [file join lib pvfs.tcl] \
+  [file join lib base64archive.tcl] \
+  [file join lib embeddedchan.tcl]
+]
 
 import $appFiles lib/app
 add module configurator modules
 add modulePath modules
+
+init {
+  source [file join lib app parcel.tcl]
+}
