@@ -13,8 +13,7 @@ namespace eval embeddedChan {
     read
   }
   namespace export -clear {*}$supportedSubCommands
-  # TODO: Work out what the following does
-  namespace ensemble create -subcommands {}
+  namespace ensemble create
 }
 
 proc embeddedChan::open {contents} {
