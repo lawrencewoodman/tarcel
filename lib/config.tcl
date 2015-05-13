@@ -10,18 +10,28 @@ namespace eval config {
 
   variable archive [Base64Archive new]
   variable initScript {}
+  variable configVars [dict create]
+  variable outputFilename {}
 }
 
 
 proc config::load {filename} {
   set exposeCmds {
+    if if
+    lassign lassign
     list list
+    lsort lsort
+    regexp regexp
+    regsub regsub
     set set
   }
   set slaveCmds {
+    config config::Config
+    error config::Error
     fetch config::Fetch
     file config::File
     find config::Find
+    get config::Get
     import config::Import
     init config::Init
   }
@@ -39,21 +49,53 @@ proc config::getArchive {} {
 }
 
 
-proc config::getAdditionalModulePaths {} {
-  variable additionalModulePaths
-  return $additionalModulePaths
-}
-
-
 proc config::getInitScript {} {
   variable initScript
   return $initScript
 }
 
 
+proc config::getConfigVar {varName} {
+  variable configVars
+  if {[dict exists $configVars $varName]} {
+    return [dict get $configVars $varName]
+  } else {
+    return {}
+  }
+}
+
+
 ########################
 # Internal commands
 ########################
+
+proc config::Error {interp msg} {
+  error $msg
+}
+
+proc config::Config {interp command args} {
+  variable configVars
+  switch $command {
+    set {
+      lassign $args varName value
+      dict set configVars $varName $value
+    }
+    default {
+      return -code error "invalid config command: $command"
+    }
+  }
+}
+
+
+proc config::Get {interp what args} {
+  switch $what {
+    packageLoadCommands { GetPackageLoadCommands {*}$args }
+    default {
+      return -code error "invalid command: get $what $args"
+    }
+  }
+}
+
 
 proc config::Init {interp script} {
   variable initScript
@@ -74,10 +116,12 @@ proc config::Fetch {interp files importPoint} {
 
 
 proc config::File {interp command args} {
-  if {$command eq "join"} {
-    return [::file join {*}$args]
-  } else {
-    return -code error "invalid command for file: $command"
+  switch $command {
+    join { return [::file join {*}$args] }
+    tail { return [::file tail {*}$args] }
+    default {
+      return -code error "invalid command for file: $command"
+    }
   }
 }
 
@@ -120,4 +164,16 @@ proc config::FindModule {args} {
   set latestModule [lindex [lsort -decreasing -index 1 $foundModules] 0]
   lassign $latestModule fullModuleFilename
   return $fullModuleFilename
+}
+
+
+proc config::GetPackageLoadCommands {args} {
+  lassign $args packageName
+  {*}[package unknown] $packageName
+  set versions [package versions $packageName]
+  if {[llength $versions] == 0} {
+    return {}
+  }
+  set latestVersion [lindex $versions 0]
+  return [list [package ifneeded $packageName $latestVersion] $latestVersion]
 }

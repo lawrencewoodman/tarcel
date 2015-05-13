@@ -9,7 +9,6 @@ package require base64
 package require configurator
 namespace import configurator::*
 
-
 set ThisScriptDir [file dirname [info script]]
 set LibDir [file join $ThisScriptDir lib]
 source [file join $LibDir config.tcl]
@@ -24,7 +23,17 @@ proc parcel::main {manifestFilename} {
   cd [file dirname $manifestFilename]
   config::load [file tail $manifestFilename]
   cd $startDir
-  Compile fred.tcl
+
+  set outputFilename [config::getConfigVar outputFilename]
+
+  if {$outputFilename eq {}} {
+    Compile stdout fred.tcl
+  } else {
+    puts stderr "parcel::main writing to: $outputFilename"
+    set fd [open $outputFilename w]
+    Compile $fd fred.tcl
+    close $fd
+  }
 }
 
 
@@ -32,28 +41,28 @@ proc parcel::main {manifestFilename} {
 # Internal commands
 #################################
 
-proc parcel::PutsFile {filename} {
+proc parcel::PutsFile {channelId filename} {
   set fd [open $filename r]
-  puts "\n\n"
-  puts [read $fd]
-  puts "\n\n"
+  puts $channelId "\n\n"
+  puts $channelId [read $fd]
+  puts $channelId "\n\n"
   close $fd
 }
 
 
-proc parcel::Compile {outFilename} {
+proc parcel::Compile {channelId outFilename} {
   global LibDir
   variable archive
 
-  puts [[config::getArchive] export encodedFiles]
-  PutsFile [file join $LibDir embeddedchan.tcl]
-  PutsFile [file join $LibDir base64archive.tcl]
-  PutsFile [file join $LibDir pvfs.tcl]
-  PutsFile [file join $LibDir launcher.tcl]
-  puts "pvfs::mount \[Base64Archive new \$encodedFiles\] ."
-  puts "launcher::init"
-  puts [config::getInitScript]
-  puts "launcher::finish"
+  puts $channelId [[config::getArchive] export encodedFiles]
+  PutsFile $channelId [file join $LibDir embeddedchan.tcl]
+  PutsFile $channelId [file join $LibDir base64archive.tcl]
+  PutsFile $channelId [file join $LibDir pvfs.tcl]
+  PutsFile $channelId [file join $LibDir launcher.tcl]
+  puts $channelId "pvfs::mount \[Base64Archive new \$encodedFiles\] ."
+  puts $channelId "launcher::init"
+  puts $channelId [config::getInitScript]
+  puts $channelId "launcher::finish"
 }
 
 
