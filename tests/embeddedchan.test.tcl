@@ -20,4 +20,17 @@ test read-1 {Ensure doesn't return more than requested} -setup {
 } -result {This is s}
 
 
+test read-2 {Ensure reads from correct position on second or more reads} -setup {
+  set text {This is some text to demonstrate a possible problem}
+  set fd [embeddedChan::open $text]
+  set result [list]
+} -body {
+  lappend result [embeddedChan::read $fd 9]
+  lappend result [embeddedChan::read $fd 5]
+  lappend result [embeddedChan::read $fd 3]
+} -cleanup {
+  embeddedChan::finalize $fd
+} -result [list {This is s} {ome t} {ext}]
+
+
 cleanupTests

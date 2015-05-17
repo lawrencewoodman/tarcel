@@ -67,7 +67,7 @@ proc embeddedChan::read {chanid count} {
                  $readEndPos
   ]
 
-  dict set files $chanid pos [expr {$pos + $count + 1}]
+  dict set files $chanid pos [expr {$pos + $count}]
 
   if {[dict get $files $chanid readWatch]} {
     chan postevent $chanid read
