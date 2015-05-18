@@ -5,6 +5,8 @@
 #
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
+
+
 package require base64
 package require configurator
 namespace import configurator::*
@@ -14,11 +16,7 @@ set LibDir [file join $ThisScriptDir lib]
 source [file join $LibDir config.tcl]
 
 
-namespace eval parcel {
-}
-
-
-proc parcel::main {manifestFilename} {
+proc main {manifestFilename} {
   set startDir [pwd]
   cd [file dirname $manifestFilename]
   config::load [file tail $manifestFilename]
@@ -29,7 +27,7 @@ proc parcel::main {manifestFilename} {
   if {$outputFilename eq {}} {
     Compile stdout fred.tcl
   } else {
-    puts stderr "parcel::main writing to: $outputFilename"
+    puts "Output filename: $outputFilename"
     set fd [open $outputFilename w]
     Compile $fd fred.tcl
     close $fd
@@ -41,7 +39,7 @@ proc parcel::main {manifestFilename} {
 # Internal commands
 #################################
 
-proc parcel::PutsFile {channelId filename} {
+proc PutsFile {channelId filename} {
   set fd [open $filename r]
   puts $channelId "\n\n"
   puts $channelId [read $fd]
@@ -50,21 +48,36 @@ proc parcel::PutsFile {channelId filename} {
 }
 
 
-proc parcel::Compile {channelId outFilename} {
+proc Compile {channelId outFilename} {
   global LibDir
+  global parcelScript
   variable archive
 
-  puts $channelId [[config::getArchive] export encodedFiles]
+  puts $channelId "if {!\[namespace exists ::parcel\]} {"
+  PutsFile $channelId [file join $LibDir parcellauncher.tcl]
+  puts $channelId "::parcel::init"
+  puts $channelId "::parcel::eval {"
   PutsFile $channelId [file join $LibDir embeddedchan.tcl]
   PutsFile $channelId [file join $LibDir base64archive.tcl]
   PutsFile $channelId [file join $LibDir pvfs.tcl]
   PutsFile $channelId [file join $LibDir launcher.tcl]
+  puts $channelId "}"
+  puts $channelId "::parcel::createAliases"
+  puts $channelId "}"
+
+  puts $channelId "::parcel::eval {"
+  puts $channelId [[config::getArchive] export encodedFiles]
   puts $channelId "pvfs::mount \[Base64Archive new \$encodedFiles\] ."
-  puts $channelId "launcher::init"
+  puts $channelId "}"
+
+  puts $channelId "::parcel::eval {"
+  puts -nonewline $channelId "launcher::init ::parcel::evalInMaster "
+  puts -nonewline $channelId "::parcel::invokeHiddenInMaster "
+  puts $channelId "::parcel::transferChanToMaster"
+  puts $channelId "}"
   puts $channelId [config::getInitScript]
-  puts $channelId "launcher::finish"
 }
 
 
 lassign $argv manifestFilename
-parcel::main $manifestFilename
+main $manifestFilename

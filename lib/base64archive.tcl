@@ -5,13 +5,7 @@
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
 
-if {[info object isa object Base64Archive] &&
-    [info object isa class Base64Archive]} {
-  return
-}
-
 package require base64
-
 
 ::oo::class create Base64Archive {
   variable files

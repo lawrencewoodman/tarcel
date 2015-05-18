@@ -7,111 +7,157 @@ set ThisScriptDir [file dirname [info script]]
 set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
-source [file join $LibDir "embeddedchan.tcl"]
-source [file join $LibDir "base64archive.tcl"]
-source [file join $LibDir "pvfs.tcl"]
-source [file join $LibDir "launcher.tcl"]
 
+source [file join $LibDir "parcellauncher.tcl"]
+
+proc ::parcel::loadSources {} {
+  ::parcel::eval {
+    set ThisScriptDir [file dirname [info script]]
+    set LibDir [file join $ThisScriptDir .. lib]
+    source [file join $LibDir "embeddedchan.tcl"]
+    source [file join $LibDir "base64archive.tcl"]
+    source [file join $LibDir "pvfs.tcl"]
+    source [file join $LibDir "launcher.tcl"]
+  }
+}
 
 test source-1 {Ensure that info script returns correct location when an encoded file sourced} -setup {
-  set infoScriptScript {
-    info script
-  }
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set infoScriptScript {
+      info script
+    }
 
-  set archive [Base64Archive new]
-  $archive importContents $infoScriptScript [file join lib app info_script.tcl]
-  pvfs::mount $archive .
-  launcher::init
+    set archive [Base64Archive new]
+    $archive importContents $infoScriptScript [file join lib app info_script.tcl]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
+  }
+  ::parcel::createAliases
 } -body {
-  source [file join lib app info_script.tcl]
+  namespace eval aTester {
+    source [file join lib app info_script.tcl]
+  }
 } -cleanup {
-  launcher::finish
+  ::parcel::finish
+  namespace delete aTester
 } -result [file join lib app info_script.tcl]
 
 
 test source-2 {Ensure that package require for a module outside of the parcel works in the correct namespace} -setup {
-  set mainScript {
-    package require greeterExternal
-    namespace import greeterExternal::*
-    hello fred
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set mainScript {
+      package require greeterExternal
+      namespace import greeterExternal::*
+      hello fred
+    }
+    set archive [Base64Archive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
   }
-  ::tcl::tm::path add $FixturesDir
-  set archive [Base64Archive new]
-  $archive importContents $mainScript [file join lib app main.tcl]
-  pvfs::mount $archive .
-  launcher::init
+  ::parcel::createAliases
 } -body {
+  ::tcl::tm::path add $FixturesDir
   source [file join lib app main.tcl]
 } -cleanup {
-  launcher::finish
-  namespace forget greeterExternal::*
   ::tcl::tm::path remove $FixturesDir
+  ::parcel::finish
+  namespace delete ::greeterExternal
 } -result {hello fred (from external greeter)}
 
 
-test source-3 {Ensure that package require for a module inside the parcel works in the correct namespace} -setup {
-  set mainScript {
-    package require greeterInternal
-    namespace import greeterInternal::*
-    hello fred
-  }
-
-  set greeterInternalScript {
-    namespace eval greeterInternal {
-      namespace export {[a-z]*}
+test source-3 {Ensure that package require for a module inside the parcel works} -setup {
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set mainScript {
+      package require greeterInternal
+      namespace import greeterInternal::*
+      hello fred
     }
 
+    set greeterInternalScript {
+      namespace eval greeterInternal {
+        namespace export {[a-z]*}
+      }
 
-    proc greeterInternal::hello {who} {
-      return "hello $who (from internal greeter)"
+
+      proc greeterInternal::hello {who} {
+        return "hello $who (from internal greeter)"
+      }
     }
-  }
 
-  ::tcl::tm::path add [file join lib modules]
-  set archive [Base64Archive new]
-  $archive importContents $mainScript [file join lib app main.tcl]
-  $archive importContents $greeterInternalScript \
-                          [file join lib modules greeterInternal-0.1.tm]
-  pvfs::mount $archive .
-  launcher::init
+    set archive [Base64Archive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
+  }
+  ::parcel::createAliases
 } -body {
+  ::tcl::tm::path add [file join lib modules]
   source [file join lib app main.tcl]
 } -cleanup {
-  launcher::finish
-  namespace forget greeterInternal::*
   ::tcl::tm::path remove [file join lib modules]
+  ::parcel::finish
+  namespace delete ::greeterInternal
 } -result {hello fred (from internal greeter)}
 
 
 test open-1 {Ensure that read works correctly for files when no count given} -setup {
-  set niceDayText {
-    This is a very nice day
-    oh yes it is
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set niceDayText {
+      This is a very nice day
+      oh yes it is
+    }
+    set archive [Base64Archive new]
+    $archive importContents $niceDayText [file join text nice_day.txt]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
   }
-  set archive [Base64Archive new]
-  $archive importContents $niceDayText [file join text nice_day.txt]
-  pvfs::mount $archive .
-  launcher::init
+  ::parcel::createAliases
 } -body {
   set fd [open [file join text nice_day.txt] r]
   set result [read $fd]
   close $fd
   set result
 } -cleanup {
-  launcher::finish
+  ::parcel::finish
 } -result {
-    This is a very nice day
-    oh yes it is
-  }
+      This is a very nice day
+      oh yes it is
+    }
 
 
 test open-2 {Ensure that read works correct for files when count given} -setup {
-  set niceDayText {This is a very nice day}
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set niceDayText {This is a very nice day}
+    set archive [Base64Archive new]
+    $archive importContents $niceDayText [file join text nice_day.txt]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
+  }
+  ::parcel::createAliases
   set result [list]
-  set archive [Base64Archive new]
-  $archive importContents $niceDayText [file join text nice_day.txt]
-  pvfs::mount $archive .
-  launcher::init
 } -body {
   set fd [open [file join text nice_day.txt] r]
   lappend result [read $fd 7]
@@ -121,18 +167,25 @@ test open-2 {Ensure that read works correct for files when count given} -setup {
   close $fd
   set result
 } -cleanup {
-  launcher::finish
+  ::parcel::finish
 } -result {{This is} { a ver} {y nice day} {}}
 
 
 test open-3 {Ensure that gets works correctly for files} -setup {
-  set niceDayText {This is a very nice day
-    and so is this}
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set niceDayText {This is a very nice day
+      and so is this}
+    set archive [Base64Archive new]
+    $archive importContents $niceDayText [file join text nice_day.txt]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
+  }
+  ::parcel::createAliases
   set result [list]
-  set archive [Base64Archive new]
-  $archive importContents $niceDayText [file join text nice_day.txt]
-  pvfs::mount $archive .
-  launcher::init
 } -body {
   set fd [open [file join text nice_day.txt] r]
   lappend result [gets $fd]
@@ -141,117 +194,153 @@ test open-3 {Ensure that gets works correctly for files} -setup {
   close $fd
   set result
 } -cleanup {
-  launcher::finish
-} -result {{This is a very nice day} {    and so is this} {}}
+  ::parcel::finish
+} -result {{This is a very nice day} {      and so is this} {}}
 
 
 test file-exists-1 {Ensure that 'file exists' finds directories within directory paths} -setup {
-  set mainScript {
-    hello
-  }
-  set greeterInternalScript {
-    proc hello {} {
-      return "hello"
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set mainScript {
+      hello
     }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [Base64Archive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
   }
-  set archive [Base64Archive new]
-  $archive importContents $mainScript [file join lib app main.tcl]
-  $archive importContents $greeterInternalScript \
-                          [file join lib modules greeterInternal-0.1.tm]
-  pvfs::mount $archive .
-  launcher::init
+  ::parcel::createAliases
 } -body {
   file exists [file join lib modules]
 } -cleanup {
-  launcher::finish
+  ::parcel::finish
 } -result {1}
 
 
 test file-exists-2 {Ensure that 'file exists' returns when files aren't found} -setup {
-  set mainScript {
-    hello
-  }
-  set greeterInternalScript {
-    proc hello {} {
-      return "hello"
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set mainScript {
+      hello
     }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [Base64Archive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
   }
-  set archive [Base64Archive new]
-  $archive importContents $mainScript [file join lib app main.tcl]
-  $archive importContents $greeterInternalScript \
-                          [file join lib modules greeterInternal-0.1.tm]
-  pvfs::mount $archive .
-  launcher::init
+  ::parcel::createAliases
 } -body {
   file exists [file join lib modules bob]
 } -cleanup {
-  launcher::finish
+  ::parcel::finish
 } -result {0}
 
 
 test glob-1 {Ensure that glob -directory works on encoded files} -setup {
-  set mainScript {
-    hello
-  }
-  set greeterInternalScript {
-    proc hello {} {
-      return "hello"
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set mainScript {
+      hello
     }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [Base64Archive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
   }
-  set archive [Base64Archive new]
-  $archive importContents $mainScript [file join lib app main.tcl]
-  $archive importContents $greeterInternalScript \
-                          [file join lib modules greeterInternal-0.1.tm]
-  pvfs::mount $archive .
-  launcher::init
+  ::parcel::createAliases
 } -body {
   glob -directory [file join lib modules] *.tm
 } -cleanup {
-  launcher::finish
+  ::parcel::finish
 } -result [list [file join lib modules greeterInternal-0.1.tm]]
 
 
 test glob-2 {Ensure that glob -directory works with -nocomplain} -setup {
-  set mainScript {
-    hello
-  }
-  set greeterInternalScript {
-    proc hello {} {
-      return "hello"
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set mainScript {
+      hello
     }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [Base64Archive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
   }
-  set archive [Base64Archive new]
-  $archive importContents $mainScript [file join lib app main.tcl]
-  $archive importContents $greeterInternalScript \
-                          [file join lib modules greeterInternal-0.1.tm]
-  pvfs::mount $archive .
-  launcher::init
+  ::parcel::createAliases
 } -body {
-  glob -nocomplain -directory [file join lib modules] *.fred
+  file exists [file join lib modules bob]
 } -cleanup {
-  launcher::finish
-} -result {}
+  ::parcel::finish
+} -result {0}
+
 
 
 test glob-3 {Ensure that glob -directory complains if nothing found and -nocomplain not passed} -setup {
-  set mainScript {
-    hello
-  }
-  set greeterInternalScript {
-    proc hello {} {
-      return "hello"
+  ::parcel::init
+  ::parcel::loadSources
+  ::parcel::eval {
+    set mainScript {
+      hello
     }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [Base64Archive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    pvfs::mount $archive .
+    launcher::init ::parcel::evalInMaster \
+                   ::parcel::invokeHiddenInMaster \
+                   ::parcel::transferChanToMaster
   }
-  set archive [Base64Archive new]
-  $archive importContents $mainScript [file join lib app main.tcl]
-  $archive importContents $greeterInternalScript \
-                          [file join lib modules greeterInternal-0.1.tm]
-  pvfs::mount $archive .
-  launcher::init
+  ::parcel::createAliases
 } -body {
   glob -directory [file join lib modules] *.fred
 } -cleanup {
-  launcher::finish
+  ::parcel::finish
 } -result {no files matched glob pattern "*.fred"} -returnCodes {error}
 
 

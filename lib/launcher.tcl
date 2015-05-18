@@ -6,20 +6,22 @@
 #
 
 namespace eval launcher {
+  variable masterEvalCmd
+  variable masterHiddenCmd
+  variable masterTransferChanCmd
   namespace export open source file glob
 }
 
 
-proc launcher::init {} {
-  rename ::open ::launcher::realOpen
-  rename ::source ::launcher::realSource
-  rename ::file ::launcher::realFile
-  rename ::glob ::launcher::realGlob
-  uplevel 1 {namespace import launcher::open}
-  uplevel 1 {namespace import launcher::source}
-  uplevel 1 {namespace import launcher::file}
-  uplevel 1 {namespace import launcher::glob}
+proc launcher::init {_masterEvalCmd _masterHiddenCmd _masterTransferChanCmd} {
+  variable masterEvalCmd
+  variable masterHiddenCmd
+  variable masterTransferChanCmd
+  set masterEvalCmd $_masterEvalCmd
+  set masterHiddenCmd $_masterHiddenCmd
+  set masterTransferChanCmd $_masterTransferChanCmd
 }
+
 
 proc launcher::glob {args} {
   set switchesWithValue {-directory -path -types}
@@ -36,7 +38,9 @@ proc launcher::glob {args} {
   }
 
   try {
-    set result [list {*}$result {*}[::launcher::realGlob {*}$args]]
+    set result [
+      list {*}$result {*}[MasterHidden glob {*}$args]
+    ]
   } on error {errorMsg options} {
     if {[string match {no files matched glob pattern*} $errorMsg] &&
         [llength $result] == 0 &&
@@ -58,7 +62,7 @@ proc launcher::file {args} {
       return 1
     }
   }
-  ::launcher::realFile {*}$args
+  ::file {*}$args
 }
 
 
@@ -67,26 +71,26 @@ proc launcher::source {args} {
   lassign [GetSwitches $switchesWithValue {} {*}$args] switches argsLeft
 
   if {[llength $argsLeft] != 1} {
-    uplevel 1 ::launcher::realSource {*}$args
+    MasterHidden source {*}$args
   }
 
   set filename $argsLeft
   set contents [pvfs::read $filename]
+  if {$contents eq {}} {
+    set contents [ReadFile $filename]
+  }
   if {$contents ne {}} {
     set callingScript [info script]
-    info script $filename
+    MasterEval info script $filename
     if {[dict exist $switches -encoding]} {
-      set res [
-        uplevel 1 [
-          encoding convertfrom [dict get $switches -encoding] $contents
-        ]
+      set contents [
+        encoding convertfrom [dict get $switches -encoding] $contents
       ]
-    } else {
-      set res [uplevel 1 $contents]
     }
-    info script $callingScript
+    set res [MasterEval $contents]
+    MasterEval info script $callingScript
   } else {
-    set res [uplevel 1 ::launcher::realSource {*}$args]
+    set res [MasterHidden source {*}$args]
   }
 
   return $res
@@ -97,9 +101,11 @@ proc launcher::open {args} {
   lassign $args filename
   if {[pvfs::exists $filename]} {
     set contents [pvfs::read $filename]
-    return [embeddedChan::open $contents]
+    set fd [embeddedChan::open $contents]
+    MasterTransferChan $fd
+    return $fd
   } else {
-    ::launcher::realOpen {*}$args
+    MasterHidden open {*}$args
   }
 }
 
@@ -117,37 +123,55 @@ proc launcher::GetEncodedFile {filename} {
 }
 
 
-proc launcher::finish {} {
-  uplevel 1 {namespace forget ::launcher::open}
-  uplevel 1 {namespace forget ::launcher::source}
-  uplevel 1 {namespace forget ::launcher::file}
-  uplevel 1 {namespace forget ::launcher::glob}
-  rename ::launcher::realOpen ::open
-  rename ::launcher::realSource ::source
-  rename ::launcher::realFile ::file
-  rename ::launcher::realGlob ::glob
-}
-
-
 ########################
 #  Internal commands
 ########################
 
+proc launcher::ReadFile {filename} {
+  try {
+    set fd [::open $filename r]
+    set contents [read $fd]
+    close $fd
+  } on error {result options} {
+    return {}
+  }
+  return $contents
+}
+
+
+proc launcher::MasterTransferChan {chan} {
+  variable masterTransferChanCmd
+  {*}$masterTransferChanCmd $chan
+}
+
+
+proc launcher::MasterEval {args} {
+  variable masterEvalCmd
+  {*}$masterEvalCmd {*}$args
+}
+
+
+proc launcher::MasterHidden {args} {
+  variable masterHiddenCmd
+  {*}$masterHiddenCmd {*}$args
+}
+
+
 proc launcher::GlobInDir {switches directory patterns} {
-  set directory [file split [file normalize $directory]]
+  set directory [::file split [::file normalize $directory]]
   set lastDirectoryPartIndex [expr {[llength $directory] - 1}]
   set result [list]
 
   set vFilenames [pvfs::ls]
   foreach vFilename $vFilenames {
-    set splitVFilename [file split [file normalize $vFilename]]
+    set splitVFilename [::file split [::file normalize $vFilename]]
     set possibleCommonDir [
       lrange $splitVFilename 0 $lastDirectoryPartIndex
     ]
 
     if {$directory == $possibleCommonDir} {
       set comparePart [
-        file join [lrange $splitVFilename \
+        ::file join [lrange $splitVFilename \
                           [expr {$lastDirectoryPartIndex+1}] \
                           end]
       ]

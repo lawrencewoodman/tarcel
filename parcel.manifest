@@ -11,9 +11,9 @@ set modules [list \
   [find module configurator]
 ]
 
-import $appFiles lib/app
-fetch $modules modules
 
+import $appFiles [file join lib app]
+fetch $modules modules
 
 init {
   ::tcl::tm::path add modules
