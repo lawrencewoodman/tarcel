@@ -8,14 +8,13 @@ namespace eval config {
   set ThisScriptDir [file dirname [info script]]
   source [file join $ThisScriptDir base64archive.tcl]
 
-  variable archive [Base64Archive new]
-  variable initScript {}
-  variable configVars [dict create]
-  variable outputFilename {}
+  variable config [dict create init {} archive [Base64Archive new]]
 }
 
 
 proc config::load {filename} {
+  variable config
+
   set exposeCmds {
     if if
     lassign lassign
@@ -40,28 +39,8 @@ proc config::load {filename} {
   set scriptIn [read $fd]
   close $fd
   parseConfig -keys {} -exposeCmds $exposeCmds -slaveCmds $slaveCmds $scriptIn
-}
 
-
-proc config::getArchive {} {
-  variable archive
-  return $archive
-}
-
-
-proc config::getInitScript {} {
-  variable initScript
-  return $initScript
-}
-
-
-proc config::getConfigVar {varName} {
-  variable configVars
-  if {[dict exists $configVars $varName]} {
-    return [dict get $configVars $varName]
-  } else {
-    return {}
-  }
+  return $config
 }
 
 
@@ -74,11 +53,11 @@ proc config::Error {interp msg} {
 }
 
 proc config::Config {interp command args} {
-  variable configVars
+  variable config
   switch $command {
     set {
       lassign $args varName value
-      dict set configVars $varName $value
+      dict set config $varName $value
     }
     default {
       return -code error "invalid config command: $command"
@@ -98,19 +77,20 @@ proc config::Get {interp what args} {
 
 
 proc config::Init {interp script} {
-  variable initScript
-  set initScript $script
+  Config $interp set init $script
 }
 
 
 proc config::Import {interp files importPoint} {
-  variable archive
+  variable config
+  set archive [dict get $config archive]
   $archive importFiles $files $importPoint
 }
 
 
 proc config::Fetch {interp files importPoint} {
-  variable archive
+  variable config
+  set archive [dict get $config archive]
   $archive fetchFiles $files $importPoint
 }
 
