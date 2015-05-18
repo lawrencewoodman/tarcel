@@ -25,11 +25,11 @@ proc main {manifestFilename} {
   set outputFilename [config::getConfigVar outputFilename]
 
   if {$outputFilename eq {}} {
-    Compile stdout fred.tcl
+    Compile stdout
   } else {
     puts "Output filename: $outputFilename"
     set fd [open $outputFilename w]
-    Compile $fd fred.tcl
+    Compile $fd
     close $fd
   }
 }
@@ -48,7 +48,7 @@ proc PutsFile {channelId filename} {
 }
 
 
-proc Compile {channelId outFilename} {
+proc Compile {channelId} {
   global LibDir
   global parcelScript
   variable archive
