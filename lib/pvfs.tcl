@@ -6,14 +6,14 @@
 #
 
 namespace eval pvfs {
-  set mounts [dict create]
+  set mounts [list]
 }
 
 
 proc pvfs::mount {archive mountPoint} {
   variable mounts
 # TODO: Need to make mount relative to something, perhaps pwd or perhaps script file
-  dict set mounts $mountPoint $archive
+  lappend mounts [list $mountPoint $archive]
 }
 
 
@@ -21,7 +21,8 @@ proc pvfs::ls {} {
   variable mounts
   set result [list]
 
-  dict for {mountPoint archive} $mounts {
+  foreach mount $mounts {
+    lassign $mount mountPoint archive
     foreach filename [$archive ls] {
       if {$mountPoint eq "."} {
         lappend result $filename
@@ -72,7 +73,8 @@ proc pvfs::DoCommonNamePartsMatch {name1 name2} {
 proc pvfs::FilenameToArchiveFilename {filename} {
   variable mounts
 
-  dict for {mountPoint archive} $mounts {
+  foreach mount $mounts {
+    lassign $mount mountPoint archive
     if {[DoCommonNamePartsMatch $mountPoint $filename]} {
       set normalizedFilename [file split [file normalize $filename]]
       set normalizedMountPoint [file split [file normalize $mountPoint]]
@@ -84,8 +86,6 @@ proc pvfs::FilenameToArchiveFilename {filename} {
 
       if {[$archive exists $archiveFilename]} {
         return [list $archive $archiveFilename]
-      } else {
-        return {}
       }
     }
   }
