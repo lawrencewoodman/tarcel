@@ -21,16 +21,26 @@ proc ::parcel::loadSources {} {
   }
 }
 
-test source-1 {Ensure that info script returns correct location when an encoded file sourced} -setup {
+test source-1 {Ensure that info script returns correct location when an encoded file sourced, including before and after a source} -setup {
   ::parcel::init
   ::parcel::loadSources
   ::parcel::eval {
-    set infoScriptScript {
+    set infoScriptAScript {
+      set ThisDir [file dirname [info script]]
+      set a1InfoScript [info script]
+      set bInfoScript [source [file join $ThisDir lib info_script_b.tcl]]
+      set a2InfoScript [info script]
+      list $a1InfoScript $a2InfoScript  $bInfoScript
+    }
+    set infoScriptBScript {
       info script
     }
 
     set archive [Base64Archive new]
-    $archive importContents $infoScriptScript [file join lib app info_script.tcl]
+    $archive importContents $infoScriptAScript \
+                            [file join lib app info_script_a.tcl]
+    $archive importContents $infoScriptBScript \
+                            [file join lib app lib info_script_b.tcl]
     pvfs::mount $archive .
     launcher::init ::parcel::evalInMaster \
                    ::parcel::invokeHiddenInMaster \
@@ -39,12 +49,14 @@ test source-1 {Ensure that info script returns correct location when an encoded 
   ::parcel::createAliases
 } -body {
   namespace eval aTester {
-    source [file join lib app info_script.tcl]
+    source [file join lib app info_script_a.tcl]
   }
 } -cleanup {
   ::parcel::finish
   namespace delete aTester
-} -result [file join lib app info_script.tcl]
+} -result [list [file join lib app info_script_a.tcl] \
+                [file join lib app info_script_a.tcl] \
+                [file join lib app lib info_script_b.tcl]]
 
 
 test source-2 {Ensure that package require for a module outside of the parcel works in the correct namespace} -setup {

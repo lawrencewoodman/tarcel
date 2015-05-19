@@ -4,16 +4,22 @@
 #
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
+
+package require configurator
+namespace import configurator::*
+
+
 namespace eval config {
-  set ThisScriptDir [file dirname [info script]]
+  variable ThisScriptDir [file normalize [file dirname [info script]]]
   source [file join $ThisScriptDir base64archive.tcl]
 
-  variable config [dict create init {} archive [Base64Archive new]]
+  variable config
 }
 
 
-proc config::load {filename} {
+proc config::parse {script} {
   variable config
+  set config [dict create init {} archive [Base64Archive new]]
 
   set exposeCmds {
     if if
@@ -35,11 +41,17 @@ proc config::load {filename} {
     init config::Init
   }
 
+  parseConfig -keys {} -exposeCmds $exposeCmds -slaveCmds $slaveCmds $script
+
+  return $config
+}
+
+
+proc config::load {filename} {
   set fd [open $filename r]
   set scriptIn [read $fd]
+  set config [parse $scriptIn]
   close $fd
-  parseConfig -keys {} -exposeCmds $exposeCmds -slaveCmds $slaveCmds $scriptIn
-
   return $config
 }
 

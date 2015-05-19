@@ -8,8 +8,6 @@
 
 
 package require base64
-package require configurator
-namespace import configurator::*
 
 set ThisScriptDir [file dirname [info script]]
 set LibDir [file join $ThisScriptDir lib]
@@ -23,14 +21,15 @@ proc main {manifestFilename} {
   set config [config::load [file tail $manifestFilename]]
   cd $startDir
 
+  set parcel [compiler::compile $config]
   if {[dict exists $config outputFilename]} {
     set outputFilename [dict get $config outputFilename]
     puts "Output filename: $outputFilename"
     set fd [open $outputFilename w]
-    compiler::compile $fd $config
+    puts $fd $parcel
     close $fd
   } else {
-    compiler::compile stdout $config
+    puts $parcel
   }
 }
 

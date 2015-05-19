@@ -80,7 +80,7 @@ proc launcher::source {args} {
     set contents [ReadFile $filename]
   }
   if {$contents ne {}} {
-    set callingScript [info script]
+    set callingScript [MasterEval info script]
     MasterEval info script $filename
     if {[dict exist $switches -encoding]} {
       set contents [

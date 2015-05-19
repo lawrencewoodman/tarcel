@@ -1,7 +1,9 @@
 set appFiles [list \
   parcel.tcl \
   [file join lib launcher.tcl] \
+  [file join lib parcellauncher.tcl] \
   [file join lib config.tcl] \
+  [file join lib compiler.tcl] \
   [file join lib pvfs.tcl] \
   [file join lib base64archive.tcl] \
   [file join lib embeddedchan.tcl]

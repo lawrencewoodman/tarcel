@@ -1,0 +1,3 @@
+proc orange {} {
+  return "oranges"
+}
