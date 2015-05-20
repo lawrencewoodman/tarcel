@@ -18,12 +18,13 @@ source [file join $LibDir compiler.tcl]
 proc main {manifestFilename} {
   set startDir [pwd]
   cd [file dirname $manifestFilename]
-  set config [config::load [file tail $manifestFilename]]
+  set config [Config new]
+  set configSettings [$config load [file tail $manifestFilename]]
   cd $startDir
 
-  set parcel [compiler::compile $config]
-  if {[dict exists $config outputFilename]} {
-    set outputFilename [dict get $config outputFilename]
+  set parcel [compiler::compile $configSettings]
+  if {[dict exists $configSettings outputFilename]} {
+    set outputFilename [dict get $configSettings outputFilename]
     puts "Output filename: $outputFilename"
     set fd [open $outputFilename w]
     puts $fd $parcel

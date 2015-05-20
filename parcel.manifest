@@ -15,7 +15,9 @@ set modules [list \
 
 
 import $appFiles [file join lib app]
+
 fetch $modules modules
+parcel [file join parcel tcllib base64.parcel] modules
 
 init {
   ::tcl::tm::path add modules

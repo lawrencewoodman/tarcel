@@ -1,0 +1,15 @@
+set files [list \
+  [file join eater.tcl] \
+  [file join lib foodplurals.tcl]
+]
+
+set outputFilename "eater-0.1.tm"
+import $files $outputFilename
+
+config set outputFilename $outputFilename
+
+set initScript {
+  source [file join @outputFilename eater.tcl]
+}
+
+init [string map [list @outputFilename $outputFilename] $initScript]

@@ -9,163 +9,191 @@ package require configurator
 namespace import configurator::*
 
 
-namespace eval config {
-  variable ThisScriptDir [file normalize [file dirname [info script]]]
-  source [file join $ThisScriptDir base64archive.tcl]
+set ThisScriptDir [file normalize [file dirname [info script]]]
+source [file join $ThisScriptDir base64archive.tcl]
 
+::oo::class create Config {
   variable config
-}
 
-
-proc config::parse {script} {
-  variable config
-  set config [dict create init {} archive [Base64Archive new]]
-
-  set exposeCmds {
-    if if
-    lassign lassign
-    list list
-    lsort lsort
-    regexp regexp
-    regsub regsub
-    set set
-  }
-  set slaveCmds {
-    config config::Config
-    error config::Error
-    fetch config::Fetch
-    file config::File
-    find config::Find
-    get config::Get
-    import config::Import
-    init config::Init
+  constructor {} {
+    set config [dict create init {} archive [Base64Archive new]]
   }
 
-  parseConfig -keys {} -exposeCmds $exposeCmds -slaveCmds $slaveCmds $script
-
-  return $config
-}
-
-
-proc config::load {filename} {
-  set fd [open $filename r]
-  set scriptIn [read $fd]
-  set config [parse $scriptIn]
-  close $fd
-  return $config
-}
-
-
-########################
-# Internal commands
-########################
-
-proc config::Error {interp msg} {
-  error $msg
-}
-
-proc config::Config {interp command args} {
-  variable config
-  switch $command {
-    set {
-      lassign $args varName value
-      dict set config $varName $value
+  method parse {script} {
+    set selfObject [self object]
+    set exposeCmds {
+      if if
+      lassign lassign
+      list list
+      lsort lsort
+      regexp regexp
+      regsub regsub
+      set set
+      string string
     }
-    default {
-      return -code error "invalid config command: $command"
-    }
+    set slaveCmds [dict create \
+      config [list ${selfObject}::my Config] \
+      error [list ${selfObject}::my Error] \
+      fetch [list ${selfObject}::my Fetch] \
+      file [list ${selfObject}::my File] \
+      find [list ${selfObject}::my Find] \
+      get [list ${selfObject}::my Get] \
+      import [list ${selfObject}::my Import] \
+      init [list ${selfObject}::my Init] \
+      parcel [list ${selfObject}::my Parcel]
+    ]
+
+    parseConfig -keys {} -exposeCmds $exposeCmds -slaveCmds $slaveCmds $script
+
+    return $config
   }
-}
 
 
-proc config::Get {interp what args} {
-  switch $what {
-    packageLoadCommands { GetPackageLoadCommands {*}$args }
-    default {
-      return -code error "invalid command: get $what $args"
-    }
+  method load {filename} {
+    set fd [open $filename r]
+    set scriptIn [read $fd]
+    set config [my parse $scriptIn]
+    close $fd
+    return $config
   }
-}
 
 
-proc config::Init {interp script} {
-  Config $interp set init $script
-}
+  ########################
+  # Private methods
+  ########################
+
+  method Parcel {interp parcelManifestFilename destination} {
+    set startDir [pwd]
+    set fd [open $parcelManifestFilename r]
+    set parcelManifest [read $fd]
+    close $fd
+
+    set childConfig [Config new]
+    cd [file dirname $parcelManifestFilename]
+
+    try {
+      set childConfigSettings [$childConfig parse $parcelManifest]
+    } finally {
+      cd $startDir
+    }
+
+    set parcel [compiler::compile -nostartupcode $childConfigSettings]
+    set archive [dict get $config archive]
+    set childOutputFilename [
+      file join $destination [dict get $childConfigSettings outputFilename]
+    ]
+    $archive importContents $parcel $childOutputFilename
+  }
 
 
-proc config::Import {interp files importPoint} {
-  variable config
-  set archive [dict get $config archive]
-  $archive importFiles $files $importPoint
-}
+  method Error {interp msg} {
+    error $msg
+  }
 
-
-proc config::Fetch {interp files importPoint} {
-  variable config
-  set archive [dict get $config archive]
-  $archive fetchFiles $files $importPoint
-}
-
-
-proc config::File {interp command args} {
-  switch $command {
-    join { return [::file join {*}$args] }
-    tail { return [::file tail {*}$args] }
-    default {
-      return -code error "invalid command for file: $command"
+  method Config {interp command args} {
+    set invalidVarnames {archive}
+    switch $command {
+      set {
+        lassign $args varName value
+        if {$varName in $invalidVarnames} {
+          return -code error "invalid variable for config set: $varName"
+        }
+        dict set config $varName $value
+      }
+      default {
+        return -code error "invalid config command: $command"
+      }
     }
   }
-}
 
 
-proc config::Find {interp type args} {
-  switch $type {
-    module { FindModule {*}$args }
-    default {
-      return -code error "unknown find type: $type"
+  method Get {interp what args} {
+    switch $what {
+      packageLoadCommands { my GetPackageLoadCommands {*}$args }
+      default {
+        return -code error "invalid command: get $what $args"
+      }
     }
   }
-}
+
+
+  method Init {interp script} {
+    my Config $interp set init $script
+  }
+
+
+  method Import {interp files importPoint} {
+    set archive [dict get $config archive]
+    $archive importFiles $files $importPoint
+  }
+
+
+  method Fetch {interp files importPoint} {
+    set archive [dict get $config archive]
+    $archive fetchFiles $files $importPoint
+  }
+
+
+  method File {interp command args} {
+    switch $command {
+      join { return [::file join {*}$args] }
+      tail { return [::file tail {*}$args] }
+      default {
+        return -code error "invalid command for file: $command"
+      }
+    }
+  }
+
+
+  method Find {interp type args} {
+    switch $type {
+      module { my FindModule {*}$args }
+      default {
+        return -code error "unknown find type: $type"
+      }
+    }
+  }
 
 
 # TODO: Add version number handling
-proc config::FindModule {args} {
-  variable archive
-  lassign $args moduleName destination
-  set dirPrefix [regsub {^(.*?)([^:]+)$} $moduleName {\1}]
-  set dirPrefix [regsub {::} $dirPrefix [file separator]]
-  set tailModuleName [regsub {^(.*?)([^:]+)$} $moduleName {\2}]
-  set foundModules [list]
+  method FindModule {args} {
+    lassign $args moduleName destination
+    set dirPrefix [regsub {^(.*?)([^:]+)$} $moduleName {\1}]
+    set dirPrefix [regsub {::} $dirPrefix [file separator]]
+    set tailModuleName [regsub {^(.*?)([^:]+)$} $moduleName {\2}]
+    set foundModules [list]
 
-  foreach path [::tcl::tm::path list] {
-    set possibleModules [
-      glob -nocomplain \
-           -directory [file join $path $dirPrefix] \
-           "$tailModuleName*.tm"
-    ]
-    foreach moduleFilename $possibleModules {
-      set tailFoundModule [file tail $moduleFilename]
-      set version [regsub {^(.*?)-(.*?)\.tm$} $tailFoundModule {\2}]
-      lappend foundModules [list $moduleFilename $version]
+    foreach path [::tcl::tm::path list] {
+      set possibleModules [
+        glob -nocomplain \
+             -directory [file join $path $dirPrefix] \
+             "$tailModuleName*.tm"
+      ]
+      foreach moduleFilename $possibleModules {
+        set tailFoundModule [file tail $moduleFilename]
+        set version [regsub {^(.*?)-(.*?)\.tm$} $tailFoundModule {\2}]
+        lappend foundModules [list $moduleFilename $version]
+      }
     }
+
+    if {[llength $foundModules] == 0} {
+      return -code error "Module can't be found: $moduleName"
+    }
+    set latestModule [lindex [lsort -decreasing -index 1 $foundModules] 0]
+    lassign $latestModule fullModuleFilename
+    return $fullModuleFilename
   }
 
-  if {[llength $foundModules] == 0} {
-    return -code error "Module can't be found: $moduleName"
-  }
-  set latestModule [lindex [lsort -decreasing -index 1 $foundModules] 0]
-  lassign $latestModule fullModuleFilename
-  return $fullModuleFilename
-}
 
-
-proc config::GetPackageLoadCommands {args} {
-  lassign $args packageName
-  {*}[package unknown] $packageName
-  set versions [package versions $packageName]
-  if {[llength $versions] == 0} {
-    return {}
+  method GetPackageLoadCommands {args} {
+    lassign $args packageName
+    {*}[package unknown] $packageName
+    set versions [package versions $packageName]
+    if {[llength $versions] == 0} {
+      return {}
+    }
+    set latestVersion [lindex $versions 0]
+    return [list [package ifneeded $packageName $latestVersion] $latestVersion]
   }
-  set latestVersion [lindex $versions 0]
-  return [list [package ifneeded $packageName $latestVersion] $latestVersion]
+
 }

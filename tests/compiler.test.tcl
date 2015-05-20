@@ -30,8 +30,8 @@ test compile-1 {Ensure that you can access the files in the parcel from the init
       eat orange
     }
   }
-  set config [config::parse $manifest]
-  set parcel [compiler::compile $config]
+  set config [Config new]
+  set parcel [compiler::compile [$config parse $manifest]]
   set int [interp create]
 } -body {
   $int eval $parcel
@@ -69,7 +69,6 @@ test compile-2 {Ensure can source a parcelled file} -setup {
 
     init {
       ::tcl::tm::path add modules
-      {*}[package unknown] announcer
       package require announcer
       source [file join lib eater eater.tcl]
       announce [eat orange]
@@ -77,12 +76,16 @@ test compile-2 {Ensure can source a parcelled file} -setup {
   }
   set tmpDir [file join [::fileutil::tempdir] parcelTest_[clock milliseconds]]
   file mkdir $tmpDir
+  set eaterConfig [Config new]
+  set announcerConfig [Config new]
   set eaterManifest [string map [list @tmpDir $tmpDir] $eaterManifest]
-  set announcerParcel [compiler::compile [config::parse $announcerManifest]]
+  set announcerParcel [
+    compiler::compile [$announcerConfig parse $announcerManifest]
+  ]
   set fd [open [file join $tmpDir announcer-0.1.tm] w]
   puts $fd $announcerParcel
   close $fd
-  set eaterParcel [compiler::compile [config::parse $eaterManifest]]
+  set eaterParcel [compiler::compile [$eaterConfig parse $eaterManifest]]
   set int [interp create]
 } -body {
   $int eval $eaterParcel
