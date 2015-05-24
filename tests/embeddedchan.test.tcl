@@ -33,4 +33,41 @@ test read-2 {Ensure reads from correct position on second or more reads} -setup 
 } -result [list {This is s} {ome t} {ext}]
 
 
+test seek-1 {Ensure that will seek to correct place when base start} -setup {
+  set text {This is some text to demonstrate a possible problem}
+  set fd [embeddedChan::open $text]
+  set result [list]
+} -body {
+  lappend result [embeddedChan::seek $fd 22 start]
+  lappend result [embeddedChan::read $fd 7]
+} -cleanup {
+  embeddedChan::finalize $fd
+} -result {22 emonstr}
+
+
+test seek-2 {Ensure that will seek to correct place when base end} -setup {
+  set text {This is some text to demonstrate a possible problem}
+  set fd [embeddedChan::open $text]
+  set result [list]
+} -body {
+  lappend result [embeddedChan::seek $fd -6 end]
+  lappend result [embeddedChan::read $fd 4]
+} -cleanup {
+  embeddedChan::finalize $fd
+} -result {44 prob}
+
+
+test seek-3 {Ensure that will seek to correct place when base current} -setup {
+  set text {This is some text to demonstrate a possible problem}
+  set fd [embeddedChan::open $text]
+  set result [list]
+} -body {
+  lappend result [embeddedChan::seek $fd 22 start]
+  lappend result [embeddedChan::seek $fd 4 current]
+  lappend result [embeddedChan::read $fd 4]
+} -cleanup {
+  embeddedChan::finalize $fd
+} -result {22 26 stra}
+
+
 cleanupTests

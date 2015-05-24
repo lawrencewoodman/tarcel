@@ -8,6 +8,7 @@ set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
 
+source [file join $ThisScriptDir "test_helpers.tcl"]
 source [file join $LibDir "config.tcl"]
 source [file join $LibDir "compiler.tcl"]
 
@@ -26,9 +27,10 @@ test parse-parcel-1 {Ensure that parcel will use a parcel manifesto to parcel fi
   }
   set config [Config new]
   set parcel [compiler::compile [$config parse $manifest]]
+  set tempFilename [TestHelpers::writeToTempFile $parcel]
   set int [interp create]
 } -body {
-  $int eval $parcel
+  $int eval source $tempFilename
 } -cleanup {
   interp delete $int
   cd $startDir
@@ -60,7 +62,7 @@ test parse-parcel-2 {Ensure that when using parcel to create a parcel that the r
   list $firstLine $namespaceCount $ooClassCount $procCount $methodCount
 } -cleanup {
   cd $startDir
-} -result [list "::parcel::eval \{" 0 0 0 0]
+} -result [list "::parcel::eval \{" 0 0 2 0]
 
 
 cleanupTests

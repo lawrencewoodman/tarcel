@@ -8,7 +8,7 @@ set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
 
-source [file join $LibDir "base64archive.tcl"]
+source [file join $LibDir "binarchive.tcl"]
 source [file join $LibDir "pvfs.tcl"]
 
 
@@ -18,8 +18,8 @@ test ls-1 {Ensure that you can mount multiple archives at same mount point} -set
 
   set textA {This is some text in textA}
   set textB {This is some text in textA}
-  set archiveA [Base64Archive new]
-  set archiveB [Base64Archive new]
+  set archiveA [BinArchive new]
+  set archiveB [BinArchive new]
   $archiveA importContents $textA [file join text texta.txt]
   $archiveB importContents $textB [file join text textb.txt]
   pvfs::mount $archiveA .

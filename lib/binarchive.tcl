@@ -1,19 +1,31 @@
-# Base 64 archive
+# Binary archive
 #
 # Copyright (C) 2015 Lawrence Woodman <lwoodman@vlifesystems.com>
 #
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
 
-package require base64
-
-::oo::class create Base64Archive {
+::oo::class create BinArchive {
   variable files
 
-  constructor {{_encodedFiles {}}} {
+  constructor {} {
     set files [dict create]
+  }
 
-    my AddEncodedFiles $_encodedFiles
+
+  # binary contents data begins immediately after first ^z (0x1a)
+  method load {filename fileSizes} {
+    if {[info commands ::pvfs::exists] ne "" && [::pvfs::exists $filename]} {
+      set contents [::pvfs::read $filename]
+      set fd [embeddedChan::open $contents]
+    } else {
+      set fd [open $filename r]
+    }
+    my SeekToStartOfBinaryContents $fd
+    dict for {filename size} $fileSizes {
+      dict set files $filename [read $fd $size]
+    }
+    close $fd
   }
 
 
@@ -54,16 +66,23 @@ package require base64
   }
 
 
-  # TODO: Fix encoding for non ascii input
-  # TODO: Catch any errors
-  method export {varName} {
-    set result ""
-    append result "set $varName \{\n"
+  method export {} {
+    variable files
+    set numFiles [dict size $files]
+
+    set fileSizes [
+      dict map {filename contents} $files {
+        set size [string length $contents]
+      }
+    ]
+
+    set binArchive ""
+
     dict for {filename contents} $files {
-      set encoding [::base64::encode $contents]
-      append result "  $filename \{$encoding\}\n"
+      append binArchive $contents
     }
-    append result "\}\n"
+
+    return [list $fileSizes $binArchive]
   }
 
 
@@ -85,9 +104,10 @@ package require base64
   ######################
   # Private methods
   ######################
-  method AddEncodedFiles {_encodedFiles} {
-    dict for {filename encoding} $_encodedFiles {
-      dict set files $filename [::base64::decode $encoding]
+
+  method SeekToStartOfBinaryContents {chan} {
+    seek $chan 0
+    while {[read $chan 1] ne "\u001a"} {
     }
   }
 
@@ -131,3 +151,4 @@ package require base64
     return 1
   }
 }
+

@@ -9,6 +9,7 @@ set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
 
+source [file join $ThisScriptDir "test_helpers.tcl"]
 source [file join $LibDir "config.tcl"]
 source [file join $LibDir "compiler.tcl"]
 
@@ -32,9 +33,10 @@ test compile-1 {Ensure that you can access the files in the parcel from the init
   }
   set config [Config new]
   set parcel [compiler::compile [$config parse $manifest]]
+  set tempFilename [TestHelpers::writeToTempFile $parcel]
   set int [interp create]
 } -body {
-  $int eval $parcel
+  $int eval source $tempFilename
 } -cleanup {
   interp delete $int
   cd $startDir
@@ -86,9 +88,10 @@ test compile-2 {Ensure can source a parcelled file} -setup {
   puts $fd $announcerParcel
   close $fd
   set eaterParcel [compiler::compile [$eaterConfig parse $eaterManifest]]
+  set tempEaterFilename [TestHelpers::writeToTempFile $eaterParcel]
   set int [interp create]
 } -body {
-  $int eval $eaterParcel
+  $int eval source $tempEaterFilename
 } -cleanup {
   interp delete $int
   cd $startDir

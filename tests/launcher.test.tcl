@@ -15,7 +15,7 @@ proc ::parcel::loadSources {} {
     set ThisScriptDir [file dirname [info script]]
     set LibDir [file join $ThisScriptDir .. lib]
     source [file join $LibDir "embeddedchan.tcl"]
-    source [file join $LibDir "base64archive.tcl"]
+    source [file join $LibDir "binarchive.tcl"]
     source [file join $LibDir "pvfs.tcl"]
     source [file join $LibDir "launcher.tcl"]
   }
@@ -36,7 +36,7 @@ test source-1 {Ensure that info script returns correct location when an encoded 
       info script
     }
 
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $infoScriptAScript \
                             [file join lib app info_script_a.tcl]
     $archive importContents $infoScriptBScript \
@@ -68,7 +68,7 @@ test source-2 {Ensure that package require for a module outside of the parcel wo
       namespace import greeterExternal::*
       hello fred
     }
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     pvfs::mount $archive .
     launcher::init ::parcel::evalInMaster \
@@ -107,7 +107,7 @@ test source-3 {Ensure that package require for a module inside the parcel works}
       }
     }
 
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -135,7 +135,7 @@ test open-1 {Ensure that read works correctly for files when no count given} -se
       This is a very nice day
       oh yes it is
     }
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
     pvfs::mount $archive .
     launcher::init ::parcel::evalInMaster \
@@ -161,7 +161,7 @@ test open-2 {Ensure that read works correct for files when count given} -setup {
   ::parcel::loadSources
   ::parcel::eval {
     set niceDayText {This is a very nice day}
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
     pvfs::mount $archive .
     launcher::init ::parcel::evalInMaster \
@@ -189,7 +189,7 @@ test open-3 {Ensure that gets works correctly for files} -setup {
   ::parcel::eval {
     set niceDayText {This is a very nice day
       and so is this}
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
     pvfs::mount $archive .
     launcher::init ::parcel::evalInMaster \
@@ -222,7 +222,7 @@ test file-exists-1 {Ensure that 'file exists' finds directories within directory
         return "hello"
       }
     }
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -251,7 +251,7 @@ test file-exists-2 {Ensure that 'file exists' returns when files aren't found} -
         return "hello"
       }
     }
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -280,7 +280,7 @@ test glob-1 {Ensure that glob -directory works on encoded files} -setup {
         return "hello"
       }
     }
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -309,7 +309,7 @@ test glob-2 {Ensure that glob -directory works with -nocomplain} -setup {
         return "hello"
       }
     }
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -339,7 +339,7 @@ test glob-3 {Ensure that glob -directory complains if nothing found and -nocompl
         return "hello"
       }
     }
-    set archive [Base64Archive new]
+    set archive [BinArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]

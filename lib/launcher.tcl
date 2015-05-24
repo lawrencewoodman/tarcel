@@ -75,10 +75,7 @@ proc launcher::source {args} {
   }
 
   set filename $argsLeft
-  set contents [pvfs::read $filename]
-  if {$contents eq {}} {
-    set contents [ReadFile $filename]
-  }
+  set contents [ReadTclFile $filename]
   if {$contents ne {}} {
     set callingScript [MasterEval info script]
     MasterEval info script $filename
@@ -127,15 +124,23 @@ proc launcher::GetEncodedFile {filename} {
 #  Internal commands
 ########################
 
-proc launcher::ReadFile {filename} {
+proc launcher::ReadTclFile {filename} {
   try {
-    set fd [::open $filename r]
-    set contents [read $fd]
-    close $fd
-  } on error {result options} {
+    set contents [pvfs::read $filename]
+    if {$contents eq {}} {
+      set fd [::open $filename r]
+      set contents [read $fd]
+      close $fd
+    }
+  } on error {} {
     return {}
   }
-  return $contents
+
+  set contentsUpToControlZ [regsub "^(.*?)(\u001a.*)$" $contents {\1}]
+  if {$contentsUpToControlZ eq {}} {
+    return $contents
+  }
+  return $contentsUpToControlZ
 }
 
 

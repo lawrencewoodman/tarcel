@@ -5,7 +5,7 @@ set appFiles [list \
   [file join lib config.tcl] \
   [file join lib compiler.tcl] \
   [file join lib pvfs.tcl] \
-  [file join lib base64archive.tcl] \
+  [file join lib binarchive.tcl] \
   [file join lib embeddedchan.tcl]
 ]
 
@@ -17,7 +17,6 @@ set modules [list \
 import $appFiles [file join lib app]
 
 fetch $modules modules
-parcel [file join parcel tcllib base64.parcel] modules
 
 init {
   ::tcl::tm::path add modules

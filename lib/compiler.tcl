@@ -25,6 +25,7 @@ proc compiler::compile {args} {
 
   set config [lindex $args end]
   set archive [dict get $config archive]
+  lassign [$archive export] fileSizes binArchive
   set result ""
 
   if {!$noStartupCode} {
@@ -33,7 +34,7 @@ proc compiler::compile {args} {
     append result "::parcel::init\n"
     append result "::parcel::eval {\n"
     append result [IncludeFile [file join $LibDir embeddedchan.tcl]]
-    append result [IncludeFile [file join $LibDir base64archive.tcl]]
+    append result [IncludeFile [file join $LibDir binarchive.tcl]]
     append result [IncludeFile [file join $LibDir pvfs.tcl]]
     append result [IncludeFile [file join $LibDir launcher.tcl]]
     append result "}\n"
@@ -42,8 +43,9 @@ proc compiler::compile {args} {
   }
 
   append result "::parcel::eval {\n"
-  append result "[$archive export encodedFiles]\n"
-  append result "pvfs::mount \[Base64Archive new \$encodedFiles\] .\n"
+  append result "set archive \[BinArchive new\]\n"
+  append result "\$archive load \[info script\] {$fileSizes}\n"
+  append result "pvfs::mount \$archive .\n"
   append result "}\n"
 
   append result "::parcel::eval {\n"
@@ -52,6 +54,7 @@ proc compiler::compile {args} {
   append result "::parcel::transferChanToMaster\n"
   append result "}\n"
   append result [dict get $config init]
+  append result "\u001a$binArchive"
 
   return $result
 }

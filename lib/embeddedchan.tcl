@@ -11,6 +11,7 @@ namespace eval embeddedChan {
     finalize
     watch
     read
+    seek
   }
   namespace export -clear {*}$supportedSubCommands
   namespace ensemble create
@@ -74,4 +75,23 @@ proc embeddedChan::read {chanid count} {
   }
 
   return $result
+}
+
+
+proc embeddedChan::seek {chanid offset base} {
+  variable files
+  set fileSize [string length [dict get $files $chanid contents]]
+  set endPos [expr {$fileSize - 1}]
+  set pos [dict get $files $chanid pos]
+
+  switch $base {
+    start { set newPos $offset }
+    current { set newPos [expr {$pos + $offset}] }
+    end { set newPos [expr {$endPos + $offset}] }
+  }
+
+  set pos [expr {max(0, min($endPos, $newPos))}]
+  dict set files $chanid pos $pos
+
+  return $pos
 }
