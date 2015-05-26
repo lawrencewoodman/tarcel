@@ -4,9 +4,112 @@
 #
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
+# This allows you to mount archives at certain points and then takes
+# over the functionality of open, source, file and glob to access them.
+#
 
 namespace eval pvfs {
+  variable mounts [list]
+  variable masterEvalCmd
+  variable masterHiddenCmd
+  variable masterTransferChanCmd
   set mounts [list]
+  namespace export open source file glob
+}
+
+
+proc pvfs::init {_masterEvalCmd _masterHiddenCmd _masterTransferChanCmd} {
+  variable mounts
+  variable masterEvalCmd
+  variable masterHiddenCmd
+  variable masterTransferChanCmd
+  set masterEvalCmd $_masterEvalCmd
+  set masterHiddenCmd $_masterHiddenCmd
+  set masterTransferChanCmd $_masterTransferChanCmd
+}
+
+
+proc pvfs::glob {args} {
+  set switchesWithValue {-directory -path -types}
+  set switchesWithoutValue {-join -nocomplain -tails}
+  set result [list]
+
+  lassign [GetSwitches $switchesWithValue $switchesWithoutValue {*}$args] \
+          switches \
+          patterns
+
+  if {[dict exists $switches -directory]} {
+    set directory [dict get $switches -directory]
+    set result [GlobInDir $switches $directory $patterns]
+  }
+
+  try {
+    set result [
+      list {*}$result {*}[MasterHidden glob {*}$args]
+    ]
+  } on error {errorMsg options} {
+    if {[string match {no files matched glob pattern*} $errorMsg] &&
+        [llength $result] == 0 &&
+        ![dict exists $switches -nocomplain]} {
+      dict unset options -level
+      return -options $options $errorMsg
+    }
+  }
+
+  return $result
+}
+
+
+proc pvfs::file {args} {
+  lassign $args command
+
+  if {$command eq "exists" && [llength $args] == 2} {
+    if {[exists [lindex $args 1]]} {
+      return 1
+    }
+  }
+  ::file {*}$args
+}
+
+
+proc pvfs::source {args} {
+  set switchesWithValue {-encoding}
+  lassign [GetSwitches $switchesWithValue {} {*}$args] switches argsLeft
+
+  if {[llength $argsLeft] != 1} {
+    MasterHidden source {*}$args
+  }
+
+  set filename $argsLeft
+  set contents [ReadTclFile $filename]
+  if {$contents ne {}} {
+    set callingScript [MasterEval info script]
+    MasterEval info script $filename
+    if {[dict exist $switches -encoding]} {
+      set contents [
+        encoding convertfrom [dict get $switches -encoding] $contents
+      ]
+    }
+    set res [MasterEval $contents]
+    MasterEval info script $callingScript
+  } else {
+    set res [MasterHidden source {*}$args]
+  }
+
+  return $res
+}
+
+
+proc pvfs::open {args} {
+  lassign $args filename
+  if {[exists $filename]} {
+    set contents [read $filename]
+    set fd [embeddedChan::open $contents]
+    MasterTransferChan $fd
+    return $fd
+  } else {
+    MasterHidden open {*}$args
+  }
 }
 
 
@@ -14,25 +117,6 @@ proc pvfs::mount {archive mountPoint} {
   variable mounts
 # TODO: Need to make mount relative to something, perhaps pwd or perhaps script file
   lappend mounts [list $mountPoint $archive]
-}
-
-
-proc pvfs::ls {} {
-  variable mounts
-  set result [list]
-
-  foreach mount $mounts {
-    lassign $mount mountPoint archive
-    foreach filename [$archive ls] {
-      if {$mountPoint eq "."} {
-        lappend result $filename
-      } else {
-        lappend result [file join $mountPoint $filename]
-      }
-    }
-  }
-
-  return $result
 }
 
 
@@ -44,7 +128,7 @@ proc pvfs::read {filename} {
 
 
 proc pvfs::exists {name} {
-  foreach filename [ls] {
+  foreach filename [Ls] {
     if {[DoCommonNamePartsMatch $name $filename]} {
       return 1
     }
@@ -53,14 +137,32 @@ proc pvfs::exists {name} {
 }
 
 
-
 #######################
 # Internal commands
 #######################
 
+proc pvfs::Ls {} {
+  variable mounts
+  set result [list]
+
+  foreach mount $mounts {
+    lassign $mount mountPoint archive
+    foreach filename [$archive ls] {
+      if {$mountPoint eq "."} {
+        lappend result $filename
+      } else {
+        lappend result [::file join $mountPoint $filename]
+      }
+    }
+  }
+
+  return $result
+}
+
+
 proc pvfs::DoCommonNamePartsMatch {name1 name2} {
-  set normalizedName1 [file split [file normalize $name1]]
-  set normalizedName2 [file split [file normalize $name2]]
+  set normalizedName1 [::file split [::file normalize $name1]]
+  set normalizedName2 [::file split [::file normalize $name2]]
   set lastIndexName1 [expr {[llength $normalizedName1] - 1}]
   set lastIndexName2 [expr {[llength $normalizedName2] - 1}]
   set lastCommonIndex [expr {min($lastIndexName1, $lastIndexName2)}]
@@ -70,18 +172,113 @@ proc pvfs::DoCommonNamePartsMatch {name1 name2} {
 }
 
 
+proc pvfs::ReadTclFile {filename} {
+  try {
+    set contents [read $filename]
+    if {$contents eq {}} {
+      set fd [::open $filename r]
+      set contents [::read $fd]
+      close $fd
+    }
+  } on error {} {
+    return {}
+  }
+
+  set contentsUpToControlZ [regsub "^(.*?)(\u001a.*)$" $contents {\1}]
+  if {$contentsUpToControlZ eq {}} {
+    return $contents
+  }
+  return $contentsUpToControlZ
+}
+
+
+proc pvfs::MasterTransferChan {chan} {
+  variable masterTransferChanCmd
+  {*}$masterTransferChanCmd $chan
+}
+
+
+proc pvfs::MasterEval {args} {
+  variable masterEvalCmd
+  {*}$masterEvalCmd {*}$args
+}
+
+
+proc pvfs::MasterHidden {args} {
+  variable masterHiddenCmd
+  {*}$masterHiddenCmd {*}$args
+}
+
+
+proc pvfs::GlobInDir {switches directory patterns} {
+  set directory [::file split [::file normalize $directory]]
+  set lastDirectoryPartIndex [expr {[llength $directory] - 1}]
+  set result [list]
+
+  set vFilenames [Ls]
+  foreach vFilename $vFilenames {
+    set splitVFilename [::file split [::file normalize $vFilename]]
+    set possibleCommonDir [
+      lrange $splitVFilename 0 $lastDirectoryPartIndex
+    ]
+
+    if {$directory == $possibleCommonDir} {
+      set comparePart [
+        ::file join [lrange $splitVFilename \
+                          [expr {$lastDirectoryPartIndex+1}] \
+                          end]
+      ]
+
+      foreach pattern $patterns {
+        if {[string match $pattern $comparePart]} {
+          lappend result $vFilename
+        }
+      }
+    }
+  }
+
+  return $result
+}
+
+
+proc pvfs::GetSwitches {switchesWithValue switchesWithoutValue args} {
+  set switches [dict create]
+  set numArgs [llength $args]
+
+  for {set argNum 0} {$argNum < $numArgs} {incr argNum} {
+    set arg [lindex $args $argNum]
+    if {![string match {-*} $arg]} {
+      break
+    }
+
+    if {$arg in $switchesWithValue && ($argNum + 1 < $numArgs)} {
+      set nextArg [lindex $args [expr {$argNum + 1}]]
+      dict set switches $arg $nextArg
+      incr argNum
+    } elseif {$arg in $switchesWithoutValue} {
+      dict set switches $arg 1
+    } else {
+      return -code error "invalid switch"
+    }
+  }
+
+  set argsLeft [lrange $args $argNum end]
+  return [list $switches $argsLeft]
+}
+
+
 proc pvfs::FilenameToArchiveFilename {filename} {
   variable mounts
 
   foreach mount $mounts {
     lassign $mount mountPoint archive
     if {[DoCommonNamePartsMatch $mountPoint $filename]} {
-      set normalizedFilename [file split [file normalize $filename]]
-      set normalizedMountPoint [file split [file normalize $mountPoint]]
+      set normalizedFilename [::file split [::file normalize $filename]]
+      set normalizedMountPoint [::file split [::file normalize $mountPoint]]
       set archiveFilename [
-        file join {*}[lrange $normalizedFilename \
-                             [llength $normalizedMountPoint] \
-                             end]
+        ::file join {*}[lrange $normalizedFilename \
+                               [llength $normalizedMountPoint] \
+                               end]
       ]
 
       if {[$archive exists $archiveFilename]} {

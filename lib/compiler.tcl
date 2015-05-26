@@ -36,7 +36,9 @@ proc compiler::compile {args} {
     append result [IncludeFile [file join $LibDir embeddedchan.tcl]]
     append result [IncludeFile [file join $LibDir binarchive.tcl]]
     append result [IncludeFile [file join $LibDir pvfs.tcl]]
-    append result [IncludeFile [file join $LibDir launcher.tcl]]
+    append result "pvfs::init ::parcel::evalInMaster "
+    append result "::parcel::invokeHiddenInMaster "
+    append result "::parcel::transferChanToMaster\n"
     append result "}\n"
     append result "::parcel::createAliases\n"
     append result "}\n"
@@ -48,11 +50,6 @@ proc compiler::compile {args} {
   append result "pvfs::mount \$archive .\n"
   append result "}\n"
 
-  append result "::parcel::eval {\n"
-  append result "launcher::init ::parcel::evalInMaster "
-  append result "::parcel::invokeHiddenInMaster "
-  append result "::parcel::transferChanToMaster\n"
-  append result "}\n"
   append result [dict get $config init]
   append result "\u001a$binArchive"
 

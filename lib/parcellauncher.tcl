@@ -31,10 +31,10 @@ namespace eval ::parcel  {
     interp hide {} file
     interp hide {} glob
 
-    interp alias {} ::open $launcherInt ::launcher::open
-    interp alias {} ::source $launcherInt ::launcher::source
-    interp alias {} ::file $launcherInt ::launcher::file
-    interp alias {} ::glob $launcherInt ::launcher::glob
+    interp alias {} ::open $launcherInt ::pvfs::open
+    interp alias {} ::source $launcherInt ::pvfs::source
+    interp alias {} ::file $launcherInt ::pvfs::file
+    interp alias {} ::glob $launcherInt ::pvfs::glob
 
     interp alias $launcherInt ::parcel::evalInMaster {} interp eval {}
     interp alias $launcherInt ::parcel::invokeHiddenInMaster \

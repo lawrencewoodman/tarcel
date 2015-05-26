@@ -15,7 +15,7 @@
 
   # binary contents data begins immediately after first ^z (0x1a)
   method load {filename fileSizes} {
-    if {[info commands ::pvfs::exists] ne "" && [::pvfs::exists $filename]} {
+    if {[::pvfs::exists $filename]} {
       set contents [::pvfs::read $filename]
       set fd [embeddedChan::open $contents]
     } else {
