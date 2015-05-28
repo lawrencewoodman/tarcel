@@ -25,7 +25,7 @@ proc compiler::compile {args} {
 
   set config [lindex $args end]
   set archive [dict get $config archive]
-  lassign [$archive export] fileSizes binArchive
+  set tarArchive [$archive export]
   set result ""
 
   if {!$noStartupCode} {
@@ -34,7 +34,7 @@ proc compiler::compile {args} {
     append result "::parcel::init\n"
     append result "::parcel::eval {\n"
     append result [IncludeFile [file join $LibDir embeddedchan.tcl]]
-    append result [IncludeFile [file join $LibDir binarchive.tcl]]
+    append result [IncludeFile [file join $LibDir tararchive.tcl]]
     append result [IncludeFile [file join $LibDir pvfs.tcl]]
     append result "pvfs::init ::parcel::evalInMaster "
     append result "::parcel::invokeHiddenInMaster "
@@ -45,13 +45,13 @@ proc compiler::compile {args} {
   }
 
   append result "::parcel::eval {\n"
-  append result "set archive \[BinArchive new\]\n"
-  append result "\$archive load \[info script\] {$fileSizes}\n"
+  append result "set archive \[TarArchive new\]\n"
+  append result "\$archive load \[info script\]\n"
   append result "pvfs::mount \$archive .\n"
   append result "}\n"
 
   append result [dict get $config init]
-  append result "\u001a$binArchive"
+  append result "\u001a$tarArchive"
 
   return $result
 }

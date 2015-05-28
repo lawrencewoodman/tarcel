@@ -17,7 +17,7 @@ namespace eval embeddedChan {
   namespace ensemble create
 }
 
-proc embeddedChan::open {contents} {
+proc embeddedChan::open {{contents ""}} {
   variable files
   set chanid [chan create read [namespace current]]
 
@@ -26,7 +26,6 @@ proc embeddedChan::open {contents} {
                 readWatch 0 \
                 contents $contents
   ]
-
   return $chanid
 }
 
@@ -92,6 +91,5 @@ proc embeddedChan::seek {chanid offset base} {
 
   set pos [expr {max(0, min($endPos, $newPos))}]
   dict set files $chanid pos $pos
-
   return $pos
 }

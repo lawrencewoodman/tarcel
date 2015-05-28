@@ -14,7 +14,7 @@ proc ::parcel::loadSources {} {
     set ThisScriptDir [file dirname [info script]]
     set LibDir [file join $ThisScriptDir .. lib]
     source [file join $LibDir "embeddedchan.tcl"]
-    source [file join $LibDir "binarchive.tcl"]
+    source [file join $LibDir "tararchive.tcl"]
     source [file join $LibDir "pvfs.tcl"]
   }
 }
@@ -26,8 +26,8 @@ test mount-1 {Ensure that you can mount multiple archives at same mount point} -
   ::parcel::eval {
     set textA {This is some text in textA}
     set textB {This is some text in textA}
-    set archiveA [BinArchive new]
-    set archiveB [BinArchive new]
+    set archiveA [TarArchive new]
+    set archiveB [TarArchive new]
     $archiveA importContents $textA [file join text texta.txt]
     $archiveB importContents $textB [file join text textb.txt]
     pvfs::init ::parcel::evalInMaster \
@@ -60,7 +60,7 @@ test source-1 {Ensure that info script returns correct location when an encoded 
       info script
     }
 
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $infoScriptAScript \
                             [file join lib app info_script_a.tcl]
     $archive importContents $infoScriptBScript \
@@ -92,7 +92,7 @@ test source-2 {Ensure that package require for a module outside of the parcel wo
       namespace import greeterExternal::*
       hello fred
     }
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     pvfs::init ::parcel::evalInMaster \
                ::parcel::invokeHiddenInMaster \
@@ -131,7 +131,7 @@ test source-3 {Ensure that package require for a module inside the parcel works}
       }
     }
 
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -159,7 +159,7 @@ test open-1 {Ensure that read works correctly for files when no count given} -se
       This is a very nice day
       oh yes it is
     }
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
     pvfs::init ::parcel::evalInMaster \
                ::parcel::invokeHiddenInMaster \
@@ -185,7 +185,7 @@ test open-2 {Ensure that read works correct for files when count given} -setup {
   ::parcel::loadSources
   ::parcel::eval {
     set niceDayText {This is a very nice day}
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
     pvfs::init ::parcel::evalInMaster \
                ::parcel::invokeHiddenInMaster \
@@ -213,7 +213,7 @@ test open-3 {Ensure that gets works correctly for files} -setup {
   ::parcel::eval {
     set niceDayText {This is a very nice day
       and so is this}
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
     pvfs::init ::parcel::evalInMaster \
                ::parcel::invokeHiddenInMaster \
@@ -246,7 +246,7 @@ test file-exists-1 {Ensure that 'file exists' finds directories within directory
         return "hello"
       }
     }
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -275,7 +275,7 @@ test file-exists-2 {Ensure that 'file exists' returns when files aren't found} -
         return "hello"
       }
     }
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -304,7 +304,7 @@ test glob-1 {Ensure that glob -directory works on encoded files} -setup {
         return "hello"
       }
     }
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -333,7 +333,7 @@ test glob-2 {Ensure that glob -directory works with -nocomplain} -setup {
         return "hello"
       }
     }
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -363,7 +363,7 @@ test glob-3 {Ensure that glob -directory complains if nothing found and -nocompl
         return "hello"
       }
     }
-    set archive [BinArchive new]
+    set archive [TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]

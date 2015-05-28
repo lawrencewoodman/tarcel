@@ -9,14 +9,11 @@ package require configurator
 namespace import configurator::*
 
 
-set ThisScriptDir [file normalize [file dirname [info script]]]
-source [file join $ThisScriptDir binarchive.tcl]
-
 ::oo::class create Config {
   variable config
 
   constructor {} {
-    set config [dict create init {} archive [BinArchive new]]
+    set config [dict create init {} archive [TarArchive new]]
   }
 
   method parse {script} {
