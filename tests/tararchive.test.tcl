@@ -8,7 +8,7 @@ set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file join $ThisScriptDir fixtures]
 
 source [file join $ThisScriptDir "test_helpers.tcl"]
-source [file join $LibDir "pvfs.tcl"]
+source [file join $LibDir "tvfs.tcl"]
 source [file join $LibDir "tararchive.tcl"]
 
 

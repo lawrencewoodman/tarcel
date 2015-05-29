@@ -1,57 +1,57 @@
-# The parcel launcher
+# The tarcel launcher
 #
 # Copyright (C) 2015 Lawrence Woodman <lwoodman@vlifesystems.com>
 #
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
 
-namespace eval ::parcel  {
-  proc ::parcel::init {} {
+namespace eval ::tarcel  {
+  proc ::tarcel::init {} {
     variable launcherInt
     set launcherInt [interp create]
   }
 
-  proc ::parcel::getLauncherInterp {} {
+  proc ::tarcel::getLauncherInterp {} {
     variable launcherInt
     return $launcherInt
   }
 
 
-  proc ::parcel::eval {script} {
+  proc ::tarcel::eval {script} {
     variable launcherInt
     $launcherInt eval info script [info script]
     $launcherInt eval $script
   }
 
 
-  proc ::parcel::createAliases {} {
+  proc ::tarcel::createAliases {} {
     variable launcherInt
     interp hide {} open
     interp hide {} source
     interp hide {} file
     interp hide {} glob
 
-    interp alias {} ::open $launcherInt ::pvfs::open
-    interp alias {} ::source $launcherInt ::pvfs::source
-    interp alias {} ::file $launcherInt ::pvfs::file
-    interp alias {} ::glob $launcherInt ::pvfs::glob
+    interp alias {} ::open $launcherInt ::tvfs::open
+    interp alias {} ::source $launcherInt ::tvfs::source
+    interp alias {} ::file $launcherInt ::tvfs::file
+    interp alias {} ::glob $launcherInt ::tvfs::glob
 
-    interp alias $launcherInt ::parcel::evalInMaster {} interp eval {}
-    interp alias $launcherInt ::parcel::invokeHiddenInMaster \
+    interp alias $launcherInt ::tarcel::evalInMaster {} interp eval {}
+    interp alias $launcherInt ::tarcel::invokeHiddenInMaster \
                  {} interp invokehidden {}
-    interp alias $launcherInt ::parcel::transferChanToMaster \
-                 {} ::parcel::transferChanToMaster
+    interp alias $launcherInt ::tarcel::transferChanToMaster \
+                 {} ::tarcel::transferChanToMaster
   }
 
 
-  proc ::parcel::transferChanToMaster {chan} {
+  proc ::tarcel::transferChanToMaster {chan} {
     variable launcherInt
     interp transfer $launcherInt $chan {}
   }
 
 
   # TODO: Put this is separate file as not needed except for testing
-  proc ::parcel::finish {} {
+  proc ::tarcel::finish {} {
     variable launcherInt
     interp alias {} ::open {}
     interp alias {} ::source {}

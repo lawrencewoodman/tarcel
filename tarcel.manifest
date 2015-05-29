@@ -1,9 +1,9 @@
 set appFiles [list \
-  parcel.tcl \
-  [file join lib parcellauncher.tcl] \
+  tarcel.tcl \
+  [file join lib tarcellauncher.tcl] \
   [file join lib config.tcl] \
   [file join lib compiler.tcl] \
-  [file join lib pvfs.tcl] \
+  [file join lib tvfs.tcl] \
   [file join lib tararchive.tcl] \
   [file join lib embeddedchan.tcl]
 ]
@@ -19,5 +19,5 @@ fetch $modules modules
 
 init {
   ::tcl::tm::path add modules
-  source [file join lib app parcel.tcl]
+  source [file join lib app tarcel.tcl]
 }

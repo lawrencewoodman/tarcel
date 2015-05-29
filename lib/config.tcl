@@ -37,7 +37,7 @@ namespace import configurator::*
       get [list ${selfObject}::my Get] \
       import [list ${selfObject}::my Import] \
       init [list ${selfObject}::my Init] \
-      parcel [list ${selfObject}::my Parcel]
+      tarcel [list ${selfObject}::my Tarcel]
     ]
 
     parseConfig -keys {} -exposeCmds $exposeCmds -slaveCmds $slaveCmds $script
@@ -59,27 +59,27 @@ namespace import configurator::*
   # Private methods
   ########################
 
-  method Parcel {interp parcelManifestFilename destination} {
+  method Tarcel {interp tarcelManifestFilename destination} {
     set startDir [pwd]
-    set fd [open $parcelManifestFilename r]
-    set parcelManifest [read $fd]
+    set fd [open $tarcelManifestFilename r]
+    set tarcelManifest [read $fd]
     close $fd
 
     set childConfig [Config new]
-    cd [file dirname $parcelManifestFilename]
+    cd [file dirname $tarcelManifestFilename]
 
     try {
-      set childConfigSettings [$childConfig parse $parcelManifest]
+      set childConfigSettings [$childConfig parse $tarcelManifest]
     } finally {
       cd $startDir
     }
 
-    set parcel [compiler::compile -nostartupcode $childConfigSettings]
+    set tarcel [compiler::compile -nostartupcode $childConfigSettings]
     set archive [dict get $config archive]
     set childOutputFilename [
       file join $destination [dict get $childConfigSettings outputFilename]
     ]
-    $archive importContents $parcel $childOutputFilename
+    $archive importContents $tarcel $childOutputFilename
   }
 
 

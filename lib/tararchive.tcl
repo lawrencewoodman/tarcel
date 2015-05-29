@@ -15,8 +15,8 @@
 
   # tarball begins immediately after first ^z (0x1a)
   method load {filename} {
-    if {[::pvfs::exists $filename]} {
-      set contents [::pvfs::read $filename]
+    if {[::tvfs::exists $filename]} {
+      set contents [::tvfs::read $filename]
     } else {
       set fd [open $filename r]
       set contents [read $fd]

@@ -1,4 +1,4 @@
-# Parcel Virtual File System
+# Tarcel Virtual File System
 #
 # Copyright (C) 2015 Lawrence Woodman <lwoodman@vlifesystems.com>
 #
@@ -8,7 +8,7 @@
 # over the functionality of open, source, file and glob to access them.
 #
 
-namespace eval pvfs {
+namespace eval tvfs {
   variable mounts [list]
   variable masterEvalCmd
   variable masterHiddenCmd
@@ -18,7 +18,7 @@ namespace eval pvfs {
 }
 
 
-proc pvfs::init {_masterEvalCmd _masterHiddenCmd _masterTransferChanCmd} {
+proc tvfs::init {_masterEvalCmd _masterHiddenCmd _masterTransferChanCmd} {
   variable mounts
   variable masterEvalCmd
   variable masterHiddenCmd
@@ -29,7 +29,7 @@ proc pvfs::init {_masterEvalCmd _masterHiddenCmd _masterTransferChanCmd} {
 }
 
 
-proc pvfs::glob {args} {
+proc tvfs::glob {args} {
   set switchesWithValue {-directory -path -types}
   set switchesWithoutValue {-join -nocomplain -tails}
   set result [list]
@@ -60,7 +60,7 @@ proc pvfs::glob {args} {
 }
 
 
-proc pvfs::file {args} {
+proc tvfs::file {args} {
   lassign $args command
 
   if {$command eq "exists" && [llength $args] == 2} {
@@ -72,7 +72,7 @@ proc pvfs::file {args} {
 }
 
 
-proc pvfs::source {args} {
+proc tvfs::source {args} {
   set switchesWithValue {-encoding}
   lassign [GetSwitches $switchesWithValue {} {*}$args] switches argsLeft
 
@@ -100,7 +100,7 @@ proc pvfs::source {args} {
 }
 
 
-proc pvfs::open {args} {
+proc tvfs::open {args} {
   lassign $args filename
   if {[exists $filename]} {
     set contents [read $filename]
@@ -113,21 +113,21 @@ proc pvfs::open {args} {
 }
 
 
-proc pvfs::mount {archive mountPoint} {
+proc tvfs::mount {archive mountPoint} {
   variable mounts
 # TODO: Need to make mount relative to something, perhaps pwd or perhaps script file
   lappend mounts [list $mountPoint $archive]
 }
 
 
-proc pvfs::read {filename} {
+proc tvfs::read {filename} {
   lassign [FilenameToArchiveFilename $filename] archive archiveFilename
   if {$archive eq {}} {return {}}
   $archive read $archiveFilename
 }
 
 
-proc pvfs::exists {name} {
+proc tvfs::exists {name} {
   foreach filename [Ls] {
     if {[DoCommonNamePartsMatch $name $filename]} {
       return 1
@@ -141,7 +141,7 @@ proc pvfs::exists {name} {
 # Internal commands
 #######################
 
-proc pvfs::Ls {} {
+proc tvfs::Ls {} {
   variable mounts
   set result [list]
 
@@ -160,7 +160,7 @@ proc pvfs::Ls {} {
 }
 
 
-proc pvfs::DoCommonNamePartsMatch {name1 name2} {
+proc tvfs::DoCommonNamePartsMatch {name1 name2} {
   set normalizedName1 [::file split [::file normalize $name1]]
   set normalizedName2 [::file split [::file normalize $name2]]
   set lastIndexName1 [expr {[llength $normalizedName1] - 1}]
@@ -172,7 +172,7 @@ proc pvfs::DoCommonNamePartsMatch {name1 name2} {
 }
 
 
-proc pvfs::ReadTclFile {filename} {
+proc tvfs::ReadTclFile {filename} {
   try {
     set contents [read $filename]
     if {$contents eq {}} {
@@ -192,25 +192,25 @@ proc pvfs::ReadTclFile {filename} {
 }
 
 
-proc pvfs::MasterTransferChan {chan} {
+proc tvfs::MasterTransferChan {chan} {
   variable masterTransferChanCmd
   {*}$masterTransferChanCmd $chan
 }
 
 
-proc pvfs::MasterEval {args} {
+proc tvfs::MasterEval {args} {
   variable masterEvalCmd
   {*}$masterEvalCmd {*}$args
 }
 
 
-proc pvfs::MasterHidden {args} {
+proc tvfs::MasterHidden {args} {
   variable masterHiddenCmd
   {*}$masterHiddenCmd {*}$args
 }
 
 
-proc pvfs::GlobInDir {switches directory patterns} {
+proc tvfs::GlobInDir {switches directory patterns} {
   set directory [::file split [::file normalize $directory]]
   set lastDirectoryPartIndex [expr {[llength $directory] - 1}]
   set result [list]
@@ -241,7 +241,7 @@ proc pvfs::GlobInDir {switches directory patterns} {
 }
 
 
-proc pvfs::GetSwitches {switchesWithValue switchesWithoutValue args} {
+proc tvfs::GetSwitches {switchesWithValue switchesWithoutValue args} {
   set switches [dict create]
   set numArgs [llength $args]
 
@@ -267,7 +267,7 @@ proc pvfs::GetSwitches {switchesWithValue switchesWithoutValue args} {
 }
 
 
-proc pvfs::FilenameToArchiveFilename {filename} {
+proc tvfs::FilenameToArchiveFilename {filename} {
   variable mounts
 
   foreach mount $mounts {

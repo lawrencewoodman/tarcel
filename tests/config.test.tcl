@@ -14,12 +14,12 @@ source [file join $LibDir "config.tcl"]
 source [file join $LibDir "compiler.tcl"]
 
 
-test parse-parcel-1 {Ensure that parcel will use a parcel manifesto to parcel files relative to the manifest file and add it to the parcel} -setup {
+test parse-tarcel-1 {Ensure that tarcel will use a tarcel manifesto to tarcel files relative to the manifest file and add it to the tarcel} -setup {
   set startDir [pwd]
   cd $FixturesDir
 
   set manifest {
-    parcel [file join eater eater.parcel] modules
+    tarcel [file join eater eater.tarcel] modules
 
     init {
       source [file join modules eater-0.1.tm]
@@ -27,8 +27,8 @@ test parse-parcel-1 {Ensure that parcel will use a parcel manifesto to parcel fi
     }
   }
   set config [Config new]
-  set parcel [compiler::compile [$config parse $manifest]]
-  set tempFilename [TestHelpers::writeToTempFile $parcel]
+  set tarcel [compiler::compile [$config parse $manifest]]
+  set tempFilename [TestHelpers::writeToTempFile $tarcel]
   set int [interp create]
 } -body {
   $int eval source $tempFilename
@@ -38,12 +38,12 @@ test parse-parcel-1 {Ensure that parcel will use a parcel manifesto to parcel fi
 } -result {I like eating oranges}
 
 
-test parse-parcel-2 {Ensure that when using parcel to create a parcel that the resulting file doesn't include all the setup code} -setup {
+test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the resulting file doesn't include all the setup code} -setup {
   set startDir [pwd]
   cd $FixturesDir
 
   set manifest {
-    parcel [file join eater eater.parcel] modules
+    tarcel [file join eater eater.tarcel] modules
 
     init {
       source [file join modules eater-0.1.tm]
@@ -63,7 +63,7 @@ test parse-parcel-2 {Ensure that when using parcel to create a parcel that the r
   list $firstLine $namespaceCount $ooClassCount $procCount $methodCount
 } -cleanup {
   cd $startDir
-} -result [list "::parcel::eval \{" 0 0 2 0]
+} -result [list "::tarcel::eval \{" 0 0 2 0]
 
 
 cleanupTests

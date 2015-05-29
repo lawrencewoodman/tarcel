@@ -1,5 +1,5 @@
 #! /usr/bin/env tclsh
-# A utility to package files into a 'parcel'.
+# A utility to package files into a 'tarcel'.
 #
 # Copyright (C) 2015 Lawrence Woodman <lwoodman@vlifesystems.com>
 #
@@ -21,15 +21,15 @@ proc main {manifestFilename} {
   set configSettings [$config load [file tail $manifestFilename]]
   cd $startDir
 
-  set parcel [compiler::compile $configSettings]
+  set tarcel [compiler::compile $configSettings]
   if {[dict exists $configSettings outputFilename]} {
     set outputFilename [dict get $configSettings outputFilename]
     puts "Output filename: $outputFilename"
     set fd [open $outputFilename w]
-    puts $fd $parcel
+    puts $fd $tarcel
     close $fd
   } else {
-    puts $parcel
+    puts $tarcel
   }
 }
 

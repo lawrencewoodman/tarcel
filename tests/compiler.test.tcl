@@ -16,7 +16,7 @@ source [file join $LibDir "config.tcl"]
 source [file join $LibDir "compiler.tcl"]
 
 
-test compile-1 {Ensure that you can access the files in the parcel from the init script} -setup {
+test compile-1 {Ensure that you can access the files in the tarcel from the init script} -setup {
   set startDir [pwd]
   cd $FixturesDir
 
@@ -34,8 +34,8 @@ test compile-1 {Ensure that you can access the files in the parcel from the init
     }
   }
   set config [Config new]
-  set parcel [compiler::compile [$config parse $manifest]]
-  set tempFilename [TestHelpers::writeToTempFile $parcel]
+  set tarcel [compiler::compile [$config parse $manifest]]
+  set tempFilename [TestHelpers::writeToTempFile $tarcel]
   set int [interp create]
 } -body {
   $int eval source $tempFilename
@@ -45,7 +45,7 @@ test compile-1 {Ensure that you can access the files in the parcel from the init
 } -result {I like eating oranges}
 
 
-test compile-2 {Ensure can source a parcelled file} -setup {
+test compile-2 {Ensure can source a tarcelled file} -setup {
   set startDir [pwd]
   cd $FixturesDir
 
@@ -78,19 +78,19 @@ test compile-2 {Ensure can source a parcelled file} -setup {
       announce [eat orange]
     }
   }
-  set tmpDir [file join [::fileutil::tempdir] parcelTest_[clock milliseconds]]
+  set tmpDir [file join [::fileutil::tempdir] tarcelTest_[clock milliseconds]]
   file mkdir $tmpDir
   set eaterConfig [Config new]
   set announcerConfig [Config new]
   set eaterManifest [string map [list @tmpDir $tmpDir] $eaterManifest]
-  set announcerParcel [
+  set announcerTarcel [
     compiler::compile [$announcerConfig parse $announcerManifest]
   ]
   set fd [open [file join $tmpDir announcer-0.1.tm] w]
-  puts $fd $announcerParcel
+  puts $fd $announcerTarcel
   close $fd
-  set eaterParcel [compiler::compile [$eaterConfig parse $eaterManifest]]
-  set tempEaterFilename [TestHelpers::writeToTempFile $eaterParcel]
+  set eaterTarcel [compiler::compile [$eaterConfig parse $eaterManifest]]
+  set tempEaterFilename [TestHelpers::writeToTempFile $eaterTarcel]
   set int [interp create]
 } -body {
   $int eval source $tempEaterFilename
