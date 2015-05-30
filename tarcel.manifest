@@ -1,6 +1,6 @@
 set appFiles [list \
   tarcel.tcl \
-  [file join lib tarcellauncher.tcl] \
+  [file join lib launcher.tcl] \
   [file join lib config.tcl] \
   [file join lib compiler.tcl] \
   [file join lib tvfs.tcl] \

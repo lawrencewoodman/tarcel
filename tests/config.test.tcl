@@ -63,7 +63,7 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
   list $firstLine $namespaceCount $ooClassCount $procCount $methodCount
 } -cleanup {
   cd $startDir
-} -result [list "::tarcel::eval \{" 0 0 2 0]
+} -result [list "::tarcel::launcher::eval \{" 0 0 2 0]
 
 
 cleanupTests

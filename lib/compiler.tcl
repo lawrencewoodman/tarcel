@@ -30,9 +30,9 @@ proc compiler::compile {args} {
 
   if {!$noStartupCode} {
     append result "if {!\[namespace exists ::tarcel\]} {\n"
-    append result [IncludeFile [file join $LibDir tarcellauncher.tcl]]
-    append result "::tarcel::init\n"
-    append result "::tarcel::eval {\n"
+    append result [IncludeFile [file join $LibDir launcher.tcl]]
+    append result "::tarcel::launcher::init\n"
+    append result "::tarcel::launcher::eval {\n"
     append result [IncludeFile [file join $LibDir embeddedchan.tcl]]
     append result [IncludeFile [file join $LibDir tararchive.tcl]]
     append result [IncludeFile [file join $LibDir tvfs.tcl]]
@@ -40,11 +40,11 @@ proc compiler::compile {args} {
     append result "::tarcel::invokeHiddenInMaster "
     append result "::tarcel::transferChanToMaster\n"
     append result "}\n"
-    append result "::tarcel::createAliases\n"
+    append result "::tarcel::launcher::createAliases\n"
     append result "}\n"
   }
 
-  append result "::tarcel::eval {\n"
+  append result "::tarcel::launcher::eval {\n"
   append result "set archive \[TarArchive new\]\n"
   append result "\$archive load \[info script\]\n"
   append result "tvfs::mount \$archive .\n"

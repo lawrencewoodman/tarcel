@@ -31,7 +31,7 @@ proc TestHelpers::readFromFilename {filename} {
 }
 
 
-namespace eval ::tarcel {
+namespace eval ::tarcel::launcher {
   proc finish {} {
     variable launcherInt
     interp alias {} ::open {}
