@@ -11,11 +11,6 @@ namespace eval ::tarcel  {
     set launcherInt [interp create]
   }
 
-  proc ::tarcel::getLauncherInterp {} {
-    variable launcherInt
-    return $launcherInt
-  }
-
 
   proc ::tarcel::eval {script} {
     variable launcherInt
