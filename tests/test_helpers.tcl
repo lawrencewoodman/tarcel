@@ -29,3 +29,19 @@ proc TestHelpers::readFromFilename {filename} {
   close $fd
   return $result
 }
+
+
+namespace eval ::tarcel {
+  proc finish {} {
+    variable launcherInt
+    interp alias {} ::open {}
+    interp alias {} ::source {}
+    interp alias {} ::file {}
+    interp alias {} ::glob {}
+    interp expose {} open
+    interp expose {} source
+    interp expose {} file
+    interp expose {} glob
+    interp delete $launcherInt
+  }
+}

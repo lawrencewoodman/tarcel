@@ -8,6 +8,8 @@ set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
 
 source [file join $LibDir "tarcellauncher.tcl"]
+source [file join $ThisScriptDir "test_helpers.tcl"]
+
 
 proc ::tarcel::loadSources {} {
   ::tarcel::eval {
