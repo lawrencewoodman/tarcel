@@ -5,6 +5,8 @@
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
 
+namespace import ::tarcel::tar
+
 ::oo::class create TarArchive {
   variable files
 
@@ -24,10 +26,10 @@
     }
 
     set tarball [regsub "^(.*?\u001a)(.*)$" $contents {\2}]
-    set filenames [my TarGetFilenames $tarball]
+    set filenames [tar getFilenames $tarball]
 
     foreach filename $filenames {
-      dict set files $filename [my TarGetFile $tarball $filename]
+      dict set files $filename [tar getFile $tarball $filename]
     }
   }
 
@@ -70,7 +72,7 @@
 
 
   method export {} {
-    my TarCreate $files
+    tar create $files
   }
 
 
@@ -139,170 +141,6 @@
     }
 
     return 1
-  }
-
-
-  method TarReadRecord {tarball pos} {
-    set endPos [expr {$pos + 511}]
-    set record [string range $tarball $pos $endPos]
-    list $record [expr {$endPos + 1}]
-  }
-
-
-  method TarReadHeader {tarball pos} {
-    lassign [my TarReadRecord $tarball $pos] header newPos
-    if {![my TarValidHeader $header]} {
-      return -code error "invalid tar archive header"
-    }
-    set filename [string trim [string range $header 0 99]]
-    set filesize [string trim [string range $header 124 135]]
-    set filesize [scan $filesize %o]
-    list $filename $filesize $newPos
-  }
-
-
-  method TarValidHeader {header} {
-    set checksum [string trim [string range $header 148 155]]
-    set checksum [scan $checksum %o]
-    lassign [my TarCalcChecksum $header] unsignedChecksum signedChecksum
-    if {$checksum == $unsignedChecksum ||
-        $checksum == $signedChecksum ||
-        $header eq [my TarMakeRecord {}] } {
-      return 1
-    }
-
-    return 0
-  }
-
-
-  method TarReadContents {tarball pos filesize} {
-    set result ""
-    set bytesRead 0
-    while {$bytesRead < $filesize} {
-      set recordTruncatePoint [expr {$filesize - $bytesRead - 1}]
-      lassign [my TarReadRecord $tarball $pos] record pos
-      append result [
-        string range $record 0 $recordTruncatePoint
-      ]
-      incr bytesRead 512
-    }
-    list $result $pos
-  }
-
-
-  method TarGetFilenames {tarball} {
-    set filenames [list]
-    set pos 0
-
-    while {1} {
-      lassign [my TarReadHeader $tarball $pos] filename filesize pos
-      if {$filename eq ""} {break}
-      lassign [my TarReadContents $tarball $pos $filesize] contents pos
-      lappend filenames $filename
-    }
-
-    return $filenames
-  }
-
-
-  method TarGetFile {tarball requestFilename} {
-    set pos 0
-
-    while {1} {
-      lassign [my TarReadHeader $tarball $pos] filename filesize pos
-      if {$filename eq ""} {break}
-      lassign [my TarReadContents $tarball $pos $filesize] contents pos
-      if {$filename eq $requestFilename} {
-        return $contents
-      }
-    }
-
-    return -code error "file not found: $requestFilename"
-  }
-
-
-  method TarCreate {_files} {
-    set tarball ""
-    dict for {filename contents} $_files {
-      append tarball [my TarMakeHeader $filename $contents]
-      append tarball [my TarMakeFileRecords $contents]
-    }
-
-    append tarball [my TarFinishArchive]
-  }
-
-
-  method TarMakeHeader {filename contents} {
-    set header ""
-    set filesize [string length $contents]
-    set freeFilenameBytes [expr {100 - [string length $filename]}]
-
-    append header [format %s $filename]
-    append header [binary format "a$freeFilenameBytes" {}]
-    append header [binary format a24 {}]
-    append header "[format %-11o $filesize] "
-    append header [binary format a12 {}]
-    append header "        "
-    append header "0"
-    append header [binary format a100 {}]
-
-    lassign [my TarCalcChecksum $header] checksumUnsigned
-    set formattedChecksum [format %06o $checksumUnsigned]
-    append formattedChecksum "[binary format a1 {}] "
-    set header [string replace $header 148 155 $formattedChecksum]
-
-    return [my TarMakeRecord $header]
-  }
-
-
-  method TarCalcChecksum {header} {
-    set bytes [split $header {}]
-    set checksumUnsigned 0
-    set checksumSigned 0
-    set pos 0
-
-    foreach byte $bytes {
-      # Take checksum bytes to be spaces
-      if {$pos >= 148 && $pos <= 155} {
-        set byte " "
-      }
-      binary scan $byte c signedByte
-      set unsignedByte [expr { $signedByte & 0xff }]
-      incr checksumUnsigned $unsignedByte
-      incr checksumSigned $signedByte
-      incr pos
-    }
-
-    list $checksumUnsigned $checksumSigned
-  }
-
-
-  method TarMakeFileRecords {contents} {
-    set records ""
-    set filesize [string length $contents]
-
-    set pos 0
-    while {$pos < $filesize} {
-      append records [my TarMakeRecord [string range $contents $pos end]]
-      incr pos 512
-    }
-
-    return $records
-  }
-
-
-  method TarMakeRecord {contents} {
-    set sizedContents [string range $contents 0 511]
-    set bytesShort [expr {512 - [string length $sizedContents]}]
-    set record $sizedContents
-    append record [binary format "a$bytesShort" {}]
-  }
-
-
-  method TarFinishArchive {} {
-    set result [my TarMakeRecord {}]
-    append result [my TarMakeRecord {}]
-    return $result
   }
 
 }

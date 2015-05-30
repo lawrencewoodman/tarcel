@@ -34,6 +34,7 @@ proc compiler::compile {args} {
     append result "::tarcel::launcher::init\n"
     append result "::tarcel::launcher::eval {\n"
     append result [IncludeFile [file join $LibDir embeddedchan.tcl]]
+    append result [IncludeFile [file join $LibDir tar.tcl]]
     append result [IncludeFile [file join $LibDir tararchive.tcl]]
     append result [IncludeFile [file join $LibDir tvfs.tcl]]
     append result "tvfs::init ::tarcel::evalInMaster "

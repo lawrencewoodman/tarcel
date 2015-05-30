@@ -4,6 +4,7 @@ set appFiles [list \
   [file join lib config.tcl] \
   [file join lib compiler.tcl] \
   [file join lib tvfs.tcl] \
+  [file join lib tar.tcl] \
   [file join lib tararchive.tcl] \
   [file join lib embeddedchan.tcl]
 ]
