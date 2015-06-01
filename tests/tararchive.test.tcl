@@ -87,12 +87,9 @@ test export-1 {Ensure that an archive can be exported and loaded again and have 
   set archiveB [TarArchive new]
   $archiveA importFiles $files lib
 } -body {
-  set tarBinArchive [$archiveA export]
-  set exportedArchiveFilename [
-    TestHelpers::writeToTempFile "this is some padding\u001a$tarBinArchive"
-  ]
+  set tarball [$archiveA export]
 
-  $archiveB load $exportedArchiveFilename
+  $archiveB load $tarball
   list [TestHelpers::fileCompare tararchive.test.tcl \
            [$archiveB read [file join lib tararchive.test.tcl]]] \
        [TestHelpers::fileCompare [file join fixtures greeterExternal-0.1.tm] \

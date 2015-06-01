@@ -15,17 +15,7 @@ namespace import ::tarcel::tar
   }
 
 
-  # tarball begins immediately after first ^z (0x1a)
-  method load {filename} {
-    if {[::tvfs::exists $filename]} {
-      set contents [::tvfs::read $filename]
-    } else {
-      set fd [open $filename r]
-      set contents [read $fd]
-      close $fd
-    }
-
-    set tarball [regsub "^(.*?\u001a)(.*)$" $contents {\2}]
+  method load {tarball} {
     set filenames [tar getFilenames $tarball]
 
     foreach filename $filenames {

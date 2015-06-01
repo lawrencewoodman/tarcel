@@ -14,6 +14,8 @@ source [file join $LibDir "tararchive.tcl"]
 source [file join $LibDir "config.tcl"]
 source [file join $LibDir "compiler.tcl"]
 
+namespace import ::tarcel::tar
+
 
 test parse-tarcel-1 {Ensure that tarcel will use a tarcel manifesto to tarcel files relative to the manifest file and add it to the tarcel} -setup {
   set startDir [pwd]
@@ -56,15 +58,11 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
   set archive [dict get $configSettings archive]
   set eaterScript [$archive read [file join modules eater-0.1.tm]]
 } -body {
-  set firstLine [lindex [split $eaterScript "\n"] 0]
-  set namespaceCount [regexp -all "namespace" $eaterScript]
-  set ooClassCount [regexp -all "oo::class" $eaterScript]
-  set procCount [regexp -all "proc" $eaterScript]
-  set methodCount [regexp -all "method" $eaterScript]
-  list $firstLine $namespaceCount $ooClassCount $procCount $methodCount
+  set eaterTarball [tar extractTarball $eaterScript]
+  lsort [tar getFilenames $eaterTarball]
 } -cleanup {
   cd $startDir
-} -result [list "::tarcel::launcher::eval \{" 0 0 2 0]
+} -result {commands.tcl init.tcl main.tar}
 
 
 cleanupTests

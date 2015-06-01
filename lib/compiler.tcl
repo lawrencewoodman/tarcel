@@ -14,10 +14,10 @@ proc compiler::compile {args} {
   variable LibDir
 
   set options [lrange $args 0 end-1]
-  set noStartupCode false
+  set incStartupCode true
   foreach option $options {
     if {$option eq "-nostartupcode"} {
-      set noStartupCode true
+      set incStartupCode false
     } else {
       return -code error "invalid option for compile: $option"
     }
@@ -25,34 +25,18 @@ proc compiler::compile {args} {
 
   set config [lindex $args end]
   set archive [dict get $config archive]
-  set tarArchive [$archive export]
+  set mainTarball [$archive export]
   set result ""
+  set initTarball [MakeInitTarball $mainTarball $config $incStartupCode]
 
-  if {!$noStartupCode} {
-    append result "if {!\[namespace exists ::tarcel\]} {\n"
-    append result [IncludeFile [file join $LibDir launcher.tcl]]
-    append result "::tarcel::launcher::init\n"
-    append result "::tarcel::launcher::eval {\n"
-    append result [IncludeFile [file join $LibDir embeddedchan.tcl]]
-    append result [IncludeFile [file join $LibDir tar.tcl]]
-    append result [IncludeFile [file join $LibDir tararchive.tcl]]
-    append result [IncludeFile [file join $LibDir tvfs.tcl]]
-    append result "tvfs::init ::tarcel::evalInMaster "
-    append result "::tarcel::invokeHiddenInMaster "
-    append result "::tarcel::transferChanToMaster\n"
-    append result "}\n"
-    append result "::tarcel::launcher::createAliases\n"
-    append result "}\n"
-  }
-
-  append result "::tarcel::launcher::eval {\n"
-  append result "set archive \[TarArchive new\]\n"
-  append result "\$archive load \[info script\]\n"
-  append result "tvfs::mount \$archive .\n"
+  append result [IncludeFile [file join $LibDir tar.tcl]]
+  append result "namespace eval ::tarcel {\n"
+  append result "  variable tarball \[::tarcel::tar::extractTarballFromFile "
+  append result "\[info script\]\]\n"
+  append result "  uplevel 1 \[::tarcel::tar::getFile \$tarball commands.tcl\]\n"
   append result "}\n"
-
-  append result [dict get $config init]
-  append result "\u001a$tarArchive"
+  append result "::tarcel::commands::launch\n"
+  append result "\u001a$initTarball"
 
   return $result
 }
@@ -71,4 +55,40 @@ proc compiler::IncludeFile {filename} {
   append result "\n\n\n"
   close $fd
   return $result
+}
+
+
+proc compiler::ReadFile {filename} {
+  set fd [open $filename r]
+  set contents [read $fd]
+  close $fd
+  return $contents
+}
+
+
+proc compiler::MakeInitTarball {mainTarball config includeStartupCode} {
+  variable LibDir
+
+  if {$includeStartupCode} {
+    set files [dict create \
+      commands.tcl [ReadFile [file join $LibDir commands.tcl]] \
+      main.tar $mainTarball \
+      lib/launcher.tcl [ReadFile [file join $LibDir launcher.tcl]] \
+      lib/embeddedchan.tcl [ReadFile [file join $LibDir embeddedchan.tcl]] \
+      lib/tar.tcl [ReadFile [file join $LibDir tar.tcl]] \
+      lib/tararchive.tcl [ReadFile [file join $LibDir tararchive.tcl]] \
+      lib/tvfs.tcl [ReadFile [file join $LibDir tvfs.tcl]]
+    ]
+  } else {
+    set files [dict create \
+      commands.tcl [ReadFile [file join $LibDir commands.tcl]] \
+      main.tar $mainTarball
+    ]
+  }
+
+  if {[dict exists $config init]} {
+    dict set files init.tcl [dict get $config init]
+  }
+
+  ::tarcel::tar create $files
 }

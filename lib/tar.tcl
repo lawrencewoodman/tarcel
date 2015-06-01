@@ -20,9 +20,8 @@ namespace eval ::tarcel {
     set pos 0
 
     while {1} {
-      lassign [ReadHeader $tarball $pos] filename filesize pos
+      lassign [ReadNextFile $tarball $pos] filename contents pos
       if {$filename eq ""} {break}
-      lassign [ReadContents $tarball $pos $filesize] contents pos
       if {$filename eq $requestFilename} {
         return $contents
       }
@@ -31,14 +30,28 @@ namespace eval ::tarcel {
     return -code error "file not found: $requestFilename"
   }
 
+
+  proc tar::exists {tarball checkFilename} {
+    set pos 0
+
+    while {1} {
+      lassign [ReadNextFile $tarball $pos] filename contents pos
+      if {$filename eq ""} {break}
+      if {$filename eq $checkFilename} {
+        return 1
+      }
+    }
+
+    return 0
+  }
+
   proc tar::getFilenames {tarball} {
     set filenames [list]
     set pos 0
 
     while {1} {
-      lassign [ReadHeader $tarball $pos] filename filesize pos
+      lassign [ReadNextFile $tarball $pos] filename contents pos
       if {$filename eq ""} {break}
-      lassign [ReadContents $tarball $pos $filesize] contents pos
       lappend filenames $filename
     }
 
@@ -46,9 +59,30 @@ namespace eval ::tarcel {
   }
 
 
+  proc tar::extractTarball {script} {
+    regsub {^(.*?\u001a)(.*)$} $script {\2}
+  }
+
+
+  proc tar::extractTarballFromFile {filename} {
+    set fd [open $filename r]
+    set contents [read $fd]
+    close $fd
+    extractTarball $contents
+  }
+
+
   #############################
   # Internal commands
   #############################
+  proc tar::ReadNextFile {tarball pos} {
+    lassign [ReadHeader $tarball $pos] filename filesize pos
+    if {$filename eq ""} {return {{} 0 0}}
+    lassign [ReadContents $tarball $pos $filesize] contents pos
+    return [list $filename $contents $pos]
+  }
+
+
   proc tar::ReadRecord {tarball pos} {
     set endPos [expr {$pos + 511}]
     set record [string range $tarball $pos $endPos]
