@@ -47,8 +47,8 @@ namespace eval ::tarcel {
       tvfs::mount $archive .
     }
 
-    if {[::tarcel::tar::exists $tarball init.tcl]} {
-      uplevel 1 [::tarcel::tar::getFile $tarball init.tcl]
+    if {[::tarcel::tar::exists $tarball config/init.tcl]} {
+      uplevel 1 [::tarcel::tar::getFile $tarball config/init.tcl]
     }
   }
 

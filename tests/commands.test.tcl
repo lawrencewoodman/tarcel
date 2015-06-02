@@ -42,7 +42,7 @@ test info-1 {Ensure lists files in tarcel} -setup {
     set LibDir [file join $ThisDir .. lib]
     source [file join $LibDir tar.tcl]
     set tarball [::tarcel::tar::extractTarballFromFile @tempFilename]
-    eval [::tarcel::tar::getFile $tarball commands.tcl]
+    eval [::tarcel::tar::getFile $tarball lib/commands.tcl]
     ::tarcel::commands::info $tarball
   }
 
@@ -62,9 +62,9 @@ test info-1 {Ensure lists files in tarcel} -setup {
   cd $startDir
 } -result [
   dict create filenames [
-    list commands.tcl \
-         config/info \
-         init.tcl \
+    list config/info \
+         config/init.tcl \
+         lib/commands.tcl \
          lib/embeddedchan.tcl \
          lib/launcher.tcl \
          lib/tar.tcl \
@@ -98,7 +98,7 @@ test info-2 {Ensure lists homepage set in tarcel} -setup {
     set LibDir [file join $ThisDir .. lib]
     source [file join $LibDir tar.tcl]
     set tarball [::tarcel::tar::extractTarballFromFile @tempFilename]
-    eval [::tarcel::tar::getFile $tarball commands.tcl]
+    eval [::tarcel::tar::getFile $tarball lib/commands.tcl]
     ::tarcel::commands::info $tarball
   }
 
@@ -142,7 +142,7 @@ test info-3 {Ensure lists version set in tarcel} -setup {
     set LibDir [file join $ThisDir .. lib]
     source [file join $LibDir tar.tcl]
     set tarball [::tarcel::tar::extractTarballFromFile @tempFilename]
-    eval [::tarcel::tar::getFile $tarball commands.tcl]
+    eval [::tarcel::tar::getFile $tarball lib/commands.tcl]
     ::tarcel::commands::info $tarball
   }
 

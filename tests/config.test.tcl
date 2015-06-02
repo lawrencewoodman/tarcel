@@ -62,7 +62,7 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
   lsort [tar getFilenames $eaterTarball]
 } -cleanup {
   cd $startDir
-} -result {commands.tcl init.tcl main.tar}
+} -result {config/init.tcl lib/commands.tcl main.tar}
 
 
 cleanupTests

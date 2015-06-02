@@ -60,7 +60,7 @@ proc getInfo {tarcelFilename} {
   set infoScript {
     source [file join lib tar.tcl]
     set tarball [::tarcel::tar::extractTarballFromFile @tarcelFilename]
-    eval [::tarcel::tar::getFile $tarball commands.tcl]
+    eval [::tarcel::tar::getFile $tarball lib/commands.tcl]
     ::tarcel::commands::info $tarball
   }
   set infoScript [

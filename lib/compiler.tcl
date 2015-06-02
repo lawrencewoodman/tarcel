@@ -33,7 +33,8 @@ proc compiler::compile {args} {
   append result "namespace eval ::tarcel {\n"
   append result "  variable tarball \[::tarcel::tar::extractTarballFromFile "
   append result "\[info script\]\]\n"
-  append result "  uplevel 1 \[::tarcel::tar::getFile \$tarball commands.tcl\]\n"
+  append result "  uplevel 1 \[::tarcel::tar::getFile "
+  append result "\$tarball lib/commands.tcl\]\n"
   append result "}\n"
   append result "::tarcel::commands::launch\n"
   append result "\u001a$initTarball"
@@ -85,7 +86,7 @@ proc compiler::MakeInitTarball {mainTarball config includeStartupCode} {
 
   if {$includeStartupCode} {
     set files [dict create \
-      commands.tcl [ReadFile [file join $LibDir commands.tcl]] \
+      lib/commands.tcl [ReadFile [file join $LibDir commands.tcl]] \
       main.tar $mainTarball \
       config/info [MakeInfo $config] \
       lib/launcher.tcl [ReadFile [file join $LibDir launcher.tcl]] \
@@ -96,13 +97,13 @@ proc compiler::MakeInitTarball {mainTarball config includeStartupCode} {
     ]
   } else {
     set files [dict create \
-      commands.tcl [ReadFile [file join $LibDir commands.tcl]] \
+      lib/commands.tcl [ReadFile [file join $LibDir commands.tcl]] \
       main.tar $mainTarball
     ]
   }
 
   if {[dict exists $config init]} {
-    dict set files init.tcl [dict get $config init]
+    dict set files config/init.tcl [dict get $config init]
   }
 
   ::tarcel::tar create $files
