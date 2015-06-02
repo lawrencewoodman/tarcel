@@ -8,6 +8,20 @@ namespace eval ::tarcel {
   namespace eval commands {
   }
 
+
+  proc commands::commands {} {
+    list commands launch info
+  }
+
+
+  proc commands::info {tarball} {
+    set info [dict create]
+    dict set info filenames [lsort [::tarcel::tar getFilenames $tarball]]
+    set configInfo [::tarcel::tar getFile $tarball config/info]
+    dict merge $info $configInfo
+  }
+
+
   proc commands::launch {} {
     set tarball ${::tarcel::tarball}
     if {![namespace exists ::tarcel::launcher]} {
@@ -36,5 +50,17 @@ namespace eval ::tarcel {
     if {[::tarcel::tar::exists $tarball init.tcl]} {
       uplevel 1 [::tarcel::tar::getFile $tarball init.tcl]
     }
+  }
+
+  ##########################
+  # Internal commands
+  ##########################
+
+  proc commands::WriteToFilename {contents filename} {
+    file mkdir [file dirname $filename]
+    set fd [open $filename w]
+    fconfigure $fd -translation binary
+    puts -nonewline $fd $contents
+    close $fd
   }
 }

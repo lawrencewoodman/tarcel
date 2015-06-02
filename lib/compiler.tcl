@@ -66,6 +66,20 @@ proc compiler::ReadFile {filename} {
 }
 
 
+proc compiler::MakeInfo {config} {
+  set info [dict create]
+  set configVars {homepage version}
+
+  foreach configVar $configVars {
+    if {[dict exists $config $configVar]} {
+      dict set info $configVar [dict get $config $configVar]
+    }
+  }
+
+  return $info
+}
+
+
 proc compiler::MakeInitTarball {mainTarball config includeStartupCode} {
   variable LibDir
 
@@ -73,6 +87,7 @@ proc compiler::MakeInitTarball {mainTarball config includeStartupCode} {
     set files [dict create \
       commands.tcl [ReadFile [file join $LibDir commands.tcl]] \
       main.tar $mainTarball \
+      config/info [MakeInfo $config] \
       lib/launcher.tcl [ReadFile [file join $LibDir launcher.tcl]] \
       lib/embeddedchan.tcl [ReadFile [file join $LibDir embeddedchan.tcl]] \
       lib/tar.tcl [ReadFile [file join $LibDir tar.tcl]] \

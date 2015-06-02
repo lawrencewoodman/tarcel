@@ -1,5 +1,7 @@
 # Helper functions for the tests
 
+package require fileutil
+
 namespace eval TestHelpers {
 }
 
@@ -28,6 +30,27 @@ proc TestHelpers::readFromFilename {filename} {
   set result [read $fd]
   close $fd
   return $result
+}
+
+
+proc TestHelpers::makeTempDir {} {
+  set tempDir [file join [fileutil::tempdir] tarcel_tests_[clock milliseconds]]
+  file mkdir $tempDir
+  return $tempDir
+}
+
+
+proc TestHelpers::globAll {{dir {}} {mFiles {}}} {
+  set files [glob -nocomplain -type f -directory $dir *]
+  set dirs [glob -nocomplain -type d -directory $dir *]
+  set mFiles [list {*}$mFiles {*}$files]
+
+  foreach dirDescent $dirs {
+    set filesInDir [globAll $dirDescent $mFiles]
+    set mFiles [list {*}$mFiles {*}$filesInDir]
+  }
+
+  return [lsort -unique $mFiles]
 }
 
 
