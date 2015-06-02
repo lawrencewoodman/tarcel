@@ -15,7 +15,7 @@ source [file join $LibDir compiler.tcl]
 
 
 proc handleParameters {parameters} {
-     set usage ": tarcel.tcl \[command\] value\ncommands:\n"
+     set usage ": tarcel.tcl command value\ncommands:\n"
   append usage "    wrap <.tarcel filename>   - Wrap files using .tarcel file\n"
   append usage "    info <tarcel filename>    - Information about tarcel file\n"
 
@@ -29,6 +29,11 @@ proc handleParameters {parameters} {
   switch $command {
     wrap {wrap $value}
     info {getInfo $value}
+    default {
+      puts stderr "Error: invalid command: $command\n"
+      puts stderr $usage
+      exit 1
+    }
   }
 }
 
