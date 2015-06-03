@@ -57,17 +57,9 @@ proc wrap {dotTarcelFilename} {
 
 
 proc getInfo {tarcelFilename} {
-  set infoScript {
-    source [file join lib tar.tcl]
-    set tarball [::tarcel::tar::extractTarballFromFile @tarcelFilename]
-    eval [::tarcel::tar::getFile $tarball lib/commands.tcl]
-    ::tarcel::commands::info $tarball
-  }
-  set infoScript [
-    string map [list @tarcelFilename $tarcelFilename] $infoScript
-  ]
-  set int [interp create]
-  set info [$int eval $infoScript]
+  set tarball [::tarcel::tar::extractTarballFromFile $tarcelFilename]
+  uplevel 1 [::tarcel::tar::getFile $tarball lib/commands.tcl]
+  set info [::tarcel::commands::info $tarball]
   displayInfo $tarcelFilename $info
 }
 
