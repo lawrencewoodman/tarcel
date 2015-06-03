@@ -34,8 +34,17 @@ proc TestHelpers::readFromFilename {filename} {
 
 
 proc TestHelpers::makeTempDir {} {
-  set tempDir [file join [fileutil::tempdir] tarcel_tests_[clock milliseconds]]
-  file mkdir $tempDir
+  set fd [::file tempfile mainTempFile]
+  close $fd
+  set mainTempDir [::file dirname $mainTempFile]
+  while {1} {
+    try {
+      set tempDir [::file join $mainTempDir tarcel_tests_[clock milliseconds]]
+      ::file mkdir $tempDir
+      break
+    } on error {} {}
+  }
+
   return $tempDir
 }
 
@@ -54,6 +63,24 @@ proc TestHelpers::globAll {{dir {}} {mFiles {}}} {
 }
 
 
+proc TestHelpers::makeLibWelcome {} {
+  set buildSuccess 0
+  set startDir [pwd]
+  set thisDir [file dirname [info script]]
+  set libwelcomeDir [file join $thisDir fixtures libwelcome]
+
+  try {
+    cd $libwelcomeDir
+    exec make clean
+    exec make
+    set buildSuccess 1
+  } on error {} {}
+
+  cd $startDir
+  return $buildSuccess
+}
+
+
 namespace eval ::tarcel::launcher {
   proc finish {} {
     variable launcherInt
@@ -61,10 +88,12 @@ namespace eval ::tarcel::launcher {
     interp alias {} ::source {}
     interp alias {} ::file {}
     interp alias {} ::glob {}
+    interp alias {} ::load {}
     interp expose {} open
     interp expose {} source
     interp expose {} file
     interp expose {} glob
+    interp expose {} load
     interp delete $launcherInt
   }
 }

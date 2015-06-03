@@ -33,6 +33,7 @@ namespace import ::tarcel::tar
         my RemoveDotFromFilename [file join $importPoint $filename]
       ]
       set fd [open $filename r]
+      fconfigure $fd -translation binary
       set contents [read $fd]
       close $fd
       dict set files $importedFilename $contents
@@ -49,6 +50,7 @@ namespace import ::tarcel::tar
         my RemoveDotFromFilename [file join $importPoint [file tail $filename]]
       ]
       set fd [open $filename r]
+      fconfigure $fd -translation binary
       set contents [read $fd]
       close $fd
       dict set files $importedFilename $contents

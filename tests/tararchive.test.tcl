@@ -61,6 +61,30 @@ test importFiles-3 {Ensure that .. in filename raises and error} -setup {
 -returnCodes {error}
 
 
+test importFiles-4 {Ensure that files are stored as binary files} -setup {
+  set startDir [pwd]
+  set all256Nums [list]
+  for {set i 0} {$i < 256} {incr i} {
+    lappend all256Nums $i
+  }
+  set fd [file tempfile allBinaryFilename]
+  fconfigure $fd -translation binary
+  puts -nonewline $fd [binary format c* $all256Nums]
+  close $fd
+  cd [file dirname $allBinaryFilename]
+  set files [list [file tail $allBinaryFilename]]
+  set archive [TarArchive new]
+} -body {
+  $archive importFiles $files .
+  set readAllBinaryContents [$archive read [file tail $allBinaryFilename]]
+  binary scan $readAllBinaryContents c* readNums
+  set unsignedReadNums [lmap num $readNums {expr {$num & 0xff}}]
+  expr {$unsignedReadNums == $all256Nums}
+} -cleanup {
+  cd $startDir
+} -result 1
+
+
 test fetchFiles-1 {Ensure that files are put in correct location irrespective of original location} -setup {
   set startDir [pwd]
   cd $ThisScriptDir
@@ -74,6 +98,29 @@ test fetchFiles-1 {Ensure that files are put in correct location irrespective of
 } -cleanup {
   cd $startDir
 } -result {modules/greeterExternal-0.1.tm}
+
+
+test fetchFiles-2 {Ensure that files are stored as binary files} -setup {
+  set startDir [pwd]
+  set all256Nums [list]
+  for {set i 0} {$i < 256} {incr i} {
+    lappend all256Nums $i
+  }
+  set fd [file tempfile allBinaryFilename]
+  fconfigure $fd -translation binary
+  puts -nonewline $fd [binary format c* $all256Nums]
+  close $fd
+  set files [list $allBinaryFilename]
+  set archive [TarArchive new]
+} -body {
+  $archive fetchFiles $files .
+  set readAllBinaryContents [$archive read [file tail $allBinaryFilename]]
+  binary scan $readAllBinaryContents c* readNums
+  set unsignedReadNums [lmap num $readNums {expr {$num & 0xff}}]
+  expr {$unsignedReadNums == $all256Nums}
+} -cleanup {
+  cd $startDir
+} -result 1
 
 
 test export-1 {Ensure that an archive can be exported and loaded again and have the same contents} -setup {

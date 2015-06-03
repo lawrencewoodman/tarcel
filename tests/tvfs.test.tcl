@@ -383,4 +383,34 @@ test glob-3 {Ensure that glob -directory complains if nothing found and -nocompl
 } -result {no files matched glob pattern "*.fred"} -returnCodes {error}
 
 
+if {![TestHelpers::makeLibWelcome]} {
+  puts stderr "Skipping test load-1 as couldn't build libwelcome"
+  skip load-1
+}
+
+test load-1 {Ensure can load a library from within tarcel} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set thisDir [file dirname [info script]]
+    set files [list [file join tests fixtures libwelcome libwelcome.so]]
+    set archive [TarArchive new]
+    $archive fetchFiles $files lib
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  namespace eval aTester {
+    load lib/libwelcome.so
+    welcome fred
+  }
+} -cleanup {
+  ::tarcel::launcher::finish
+  namespace delete aTester
+} -result {Welcome fred}
+
+
 cleanupTests

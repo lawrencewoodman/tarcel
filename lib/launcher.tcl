@@ -30,11 +30,13 @@ namespace eval ::tarcel {
     interp hide {} source
     interp hide {} file
     interp hide {} glob
+    interp hide {} load
 
     interp alias {} ::open $launcherInt ::tvfs::open
     interp alias {} ::source $launcherInt ::tvfs::source
     interp alias {} ::file $launcherInt ::tvfs::file
     interp alias {} ::glob $launcherInt ::tvfs::glob
+    interp alias {} ::load $launcherInt ::tvfs::load
 
     interp alias $launcherInt ::tarcel::evalInMaster {} interp eval {}
     interp alias $launcherInt ::tarcel::invokeHiddenInMaster \

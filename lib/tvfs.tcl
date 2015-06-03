@@ -60,6 +60,35 @@ proc tvfs::glob {args} {
 }
 
 
+proc tvfs::load {args} {
+  set switchesWithoutValue {-global -lazy --}
+  set result [list]
+
+  lassign [GetSwitches {} $switchesWithoutValue {*}$args] \
+          switches \
+          argsLeft
+
+  if {[llength $argsLeft] < 1 || [llength $argsLeft] > 3} {
+    MasterHidden load {*}$args
+  }
+
+  lassign $argsLeft filename
+  set argsLeft [lrange $argsLeft 1 end]
+  if {[exists $filename]} {
+    set libFileContents [read $filename]
+    set tempDir [MakeTempDir]
+    set tempLibFilename [::file join $tempDir [::file tail $filename]]
+    set fd [::open $tempLibFilename w]
+    fconfigure $fd -translation binary
+    puts -nonewline $fd $libFileContents
+    close $fd
+    MasterHidden load $tempLibFilename {*}$argsLeft
+  } else {
+    MasterHidden load $filename {*}$argsLeft
+  }
+}
+
+
 proc tvfs::file {args} {
   lassign $args command
 
@@ -288,4 +317,20 @@ proc tvfs::FilenameToArchiveFilename {filename} {
   }
 
   return {}
+}
+
+
+proc tvfs::MakeTempDir {} {
+  set fd [::file tempfile mainTempFile]
+  close $fd
+  set mainTempDir [::file dirname $mainTempFile]
+  while {1} {
+    try {
+      set tempDir [::file join $mainTempDir tarcel_tests_[clock milliseconds]]
+      ::file mkdir $tempDir
+      break
+    } on error {} {}
+  }
+
+  return $tempDir
 }
