@@ -7,7 +7,7 @@
 
 namespace import ::tarcel::tar
 
-::oo::class create TarArchive {
+::oo::class create ::tarcel::TarArchive {
   variable files
 
   constructor {} {

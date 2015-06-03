@@ -29,8 +29,8 @@ test mount-1 {Ensure that you can mount multiple archives at same mount point} -
   ::tarcel::launcher::eval {
     set textA {This is some text in textA}
     set textB {This is some text in textA}
-    set archiveA [TarArchive new]
-    set archiveB [TarArchive new]
+    set archiveA [::tarcel::TarArchive new]
+    set archiveB [::tarcel::TarArchive new]
     $archiveA importContents $textA [file join text texta.txt]
     $archiveB importContents $textB [file join text textb.txt]
     tvfs::init ::tarcel::evalInMaster \
@@ -63,7 +63,7 @@ test source-1 {Ensure that info script returns correct location when an encoded 
       info script
     }
 
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $infoScriptAScript \
                             [file join lib app info_script_a.tcl]
     $archive importContents $infoScriptBScript \
@@ -95,7 +95,7 @@ test source-2 {Ensure that package require for a module outside of the tarcel wo
       namespace import greeterExternal::*
       hello fred
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     tvfs::init ::tarcel::evalInMaster \
                ::tarcel::invokeHiddenInMaster \
@@ -134,7 +134,7 @@ test source-3 {Ensure that package require for a module inside the tarcel works}
       }
     }
 
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -162,7 +162,7 @@ test open-1 {Ensure that read works correctly for files when no count given} -se
       This is a very nice day
       oh yes it is
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
     tvfs::init ::tarcel::evalInMaster \
                ::tarcel::invokeHiddenInMaster \
@@ -188,7 +188,7 @@ test open-2 {Ensure that read works correct for files when count given} -setup {
   ::tarcel::launcher::loadSources
   ::tarcel::launcher::eval {
     set niceDayText {This is a very nice day}
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
     tvfs::init ::tarcel::evalInMaster \
                ::tarcel::invokeHiddenInMaster \
@@ -216,7 +216,7 @@ test open-3 {Ensure that gets works correctly for files} -setup {
   ::tarcel::launcher::eval {
     set niceDayText {This is a very nice day
       and so is this}
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
     tvfs::init ::tarcel::evalInMaster \
                ::tarcel::invokeHiddenInMaster \
@@ -249,7 +249,7 @@ test file-exists-1 {Ensure that 'file exists' finds directories within directory
         return "hello"
       }
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -278,7 +278,7 @@ test file-exists-2 {Ensure that 'file exists' returns when files aren't found} -
         return "hello"
       }
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -307,7 +307,7 @@ test file-exists-3 {Ensure that 'file exists' handles file normalization} -setup
         return "hello"
       }
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -336,7 +336,7 @@ test file-isfile-1 {Ensure that 'file isfile' returns if a location is a file} -
         return "hello"
       }
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -365,7 +365,7 @@ test file-isfile-2 {Ensure that 'file isfile' returns 0 if a location is a direc
         return "hello"
       }
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -389,7 +389,7 @@ test file-isfile-3 {Ensure that 'file isfile' returns 0 if location doesn't exis
     set mainScript {
       hello
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     tvfs::init ::tarcel::evalInMaster \
                ::tarcel::invokeHiddenInMaster \
@@ -416,7 +416,7 @@ test file-isfile-4 {Ensure that 'file isfile' handles file normalization} -setup
         return "hello"
       }
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -445,7 +445,7 @@ test glob-1 {Ensure that glob -directory works on encoded files} -setup {
         return "hello"
       }
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -474,7 +474,7 @@ test glob-2 {Ensure that glob -directory works with -nocomplain} -setup {
         return "hello"
       }
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -504,7 +504,7 @@ test glob-3 {Ensure that glob -directory complains if nothing found and -nocompl
         return "hello"
       }
     }
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
@@ -532,7 +532,7 @@ test load-1 {Ensure can load a library from within tarcel} -setup {
   ::tarcel::launcher::eval {
     set thisDir [file dirname [info script]]
     set files [list [file join tests fixtures libwelcome libwelcome.so]]
-    set archive [TarArchive new]
+    set archive [::tarcel::TarArchive new]
     $archive fetchFiles $files lib
     tvfs::init ::tarcel::evalInMaster \
                ::tarcel::invokeHiddenInMaster \

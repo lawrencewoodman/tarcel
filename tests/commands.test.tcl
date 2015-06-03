@@ -46,7 +46,7 @@ test info-1 {Ensure lists files in tarcel} -setup {
     ::tarcel::commands::info $tarball
   }
 
-  set config [Config new]
+  set config [::tarcel::Config new]
   set tarcel [compiler::compile [$config parse $manifest]]
   set tempFilename [TestHelpers::writeToTempFile $tarcel]
   cd $startDir
@@ -102,7 +102,7 @@ test info-2 {Ensure lists homepage set in tarcel} -setup {
     ::tarcel::commands::info $tarball
   }
 
-  set config [Config new]
+  set config [::tarcel::Config new]
   set tarcel [compiler::compile [$config parse $manifest]]
   set tempFilename [TestHelpers::writeToTempFile $tarcel]
   cd $startDir
@@ -146,7 +146,7 @@ test info-3 {Ensure lists version set in tarcel} -setup {
     ::tarcel::commands::info $tarball
   }
 
-  set config [Config new]
+  set config [::tarcel::Config new]
   set tarcel [compiler::compile [$config parse $manifest]]
   set tempFilename [TestHelpers::writeToTempFile $tarcel]
   cd $startDir

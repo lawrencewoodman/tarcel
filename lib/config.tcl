@@ -9,11 +9,11 @@ package require configurator
 namespace import configurator::*
 
 
-::oo::class create Config {
+::oo::class create ::tarcel::Config {
   variable config
 
   constructor {} {
-    set config [dict create init {} archive [TarArchive new]]
+    set config [dict create init {} archive [::tarcel::TarArchive new]]
   }
 
   method parse {script} {
@@ -65,7 +65,7 @@ namespace import configurator::*
     set tarcelManifest [read $fd]
     close $fd
 
-    set childConfig [Config new]
+    set childConfig [::tarcel::Config new]
     cd [file dirname $tarcelManifestFilename]
 
     try {

@@ -40,7 +40,7 @@ proc handleParameters {parameters} {
 
 proc wrap {dotTarcelFilename} {
   cd [file dirname $dotTarcelFilename]
-  set config [Config new]
+  set config [::tarcel::Config new]
   set configSettings [$config load [file tail $dotTarcelFilename]]
 
   set tarcel [compiler::compile $configSettings]

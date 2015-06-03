@@ -20,7 +20,7 @@ test importFiles-1 {Ensure that files are put in correct location relative to th
     tararchive.test.tcl
     fixtures/greeterExternal-0.1.tm
   }
-  set archive [TarArchive new]
+  set archive [::tarcel::TarArchive new]
 } -body {
   $archive importFiles $files lib
   $archive ls
@@ -36,7 +36,7 @@ test importFiles-2 {Ensure that any . parts of filename are removed} -setup {
     ./tararchive.test.tcl
     ./fixtures/greeterExternal-0.1.tm
   }
-  set archive [TarArchive new]
+  set archive [::tarcel::TarArchive new]
 } -body {
   $archive importFiles $files lib
   $archive ls
@@ -51,7 +51,7 @@ test importFiles-3 {Ensure that .. in filename raises and error} -setup {
   set files {
     ../tararchive.test.tcl
   }
-  set archive [TarArchive new]
+  set archive [::tarcel::TarArchive new]
 } -body {
   $archive importFiles $files lib
   $archive ls
@@ -73,7 +73,7 @@ test importFiles-4 {Ensure that files are stored as binary files} -setup {
   close $fd
   cd [file dirname $allBinaryFilename]
   set files [list [file tail $allBinaryFilename]]
-  set archive [TarArchive new]
+  set archive [::tarcel::TarArchive new]
 } -body {
   $archive importFiles $files .
   set readAllBinaryContents [$archive read [file tail $allBinaryFilename]]
@@ -91,7 +91,7 @@ test fetchFiles-1 {Ensure that files are put in correct location irrespective of
   set files {
     fixtures/greeterExternal-0.1.tm
   }
-  set archive [TarArchive new]
+  set archive [::tarcel::TarArchive new]
 } -body {
   $archive fetchFiles $files modules
   $archive ls
@@ -111,7 +111,7 @@ test fetchFiles-2 {Ensure that files are stored as binary files} -setup {
   puts -nonewline $fd [binary format c* $all256Nums]
   close $fd
   set files [list $allBinaryFilename]
-  set archive [TarArchive new]
+  set archive [::tarcel::TarArchive new]
 } -body {
   $archive fetchFiles $files .
   set readAllBinaryContents [$archive read [file tail $allBinaryFilename]]
@@ -130,8 +130,8 @@ test export-1 {Ensure that an archive can be exported and loaded again and have 
     tararchive.test.tcl
     fixtures/greeterExternal-0.1.tm
   }
-  set archiveA [TarArchive new]
-  set archiveB [TarArchive new]
+  set archiveA [::tarcel::TarArchive new]
+  set archiveB [::tarcel::TarArchive new]
   $archiveA importFiles $files lib
 } -body {
   set tarball [$archiveA export]

@@ -29,7 +29,7 @@ test parse-tarcel-1 {Ensure that tarcel will use a tarcel manifesto to tarcel fi
       eat orange
     }
   }
-  set config [Config new]
+  set config [::tarcel::Config new]
   set tarcel [compiler::compile [$config parse $manifest]]
   set tempFilename [TestHelpers::writeToTempFile $tarcel]
   set int [interp create]
@@ -53,7 +53,7 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
       eat orange
     }
   }
-  set config [Config new]
+  set config [::tarcel::Config new]
   set configSettings [$config parse $manifest]
   set archive [dict get $configSettings archive]
   set eaterScript [$archive read [file join modules eater-0.1.tm]]

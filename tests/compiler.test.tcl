@@ -34,7 +34,7 @@ test compile-1 {Ensure that you can access the files in the tarcel from the init
       eat orange
     }
   }
-  set config [Config new]
+  set config [::tarcel::Config new]
   set tarcel [compiler::compile [$config parse $manifest]]
   set tempFilename [TestHelpers::writeToTempFile $tarcel]
   set int [interp create]
@@ -81,8 +81,8 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
   }
   set tmpDir [file join [::fileutil::tempdir] tarcelTest_[clock milliseconds]]
   file mkdir $tmpDir
-  set eaterConfig [Config new]
-  set announcerConfig [Config new]
+  set eaterConfig [::tarcel::Config new]
+  set announcerConfig [::tarcel::Config new]
   set eaterManifest [string map [list @tmpDir $tmpDir] $eaterManifest]
   set announcerTarcel [
     compiler::compile [$announcerConfig parse $announcerManifest]

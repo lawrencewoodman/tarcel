@@ -42,7 +42,7 @@ namespace eval ::tarcel {
     ::tarcel::launcher::eval {
       set tarball [::tarcel::evalInMaster "uplevel 1 set ::tarcel::tarball"]
       set mainTarball [::tarcel::tar::getFile $tarball main.tar]
-      set archive [TarArchive new]
+      set archive [::tarcel::TarArchive new]
       $archive load $mainTarball
       tvfs::mount $archive .
     }
