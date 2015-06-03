@@ -85,15 +85,6 @@ namespace import ::tarcel::tar
   # Private methods
   ######################
 
-  method Write {dir filename contents} {
-    file mkdir [file join $dir [file dirname $filename]]
-    set finalFilename [file join $dir $filename]
-    set fd [open $finalFilename w]
-    puts -nonewline $fd $contents
-    close $fd
-  }
-
-
   method RemoveDotFromFilename {filename} {
     set splitFilename [file split $filename]
     set outFilename [list]
