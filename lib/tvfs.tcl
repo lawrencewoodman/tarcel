@@ -92,9 +92,16 @@ proc tvfs::load {args} {
 proc tvfs::file {args} {
   lassign $args command
 
-  if {$command eq "exists" && [llength $args] == 2} {
-    if {[exists [lindex $args 1]]} {
-      return 1
+  switch $command {
+    exists {
+      if {[llength $args] == 2 && [exists [lindex $args 1]]} {
+        return 1
+      }
+    }
+    isfile {
+      if {[llength $args] == 2 && [isfile [lindex $args 1]]} {
+        return 1
+      }
     }
   }
   ::file {*}$args
@@ -165,6 +172,15 @@ proc tvfs::exists {name} {
   return 0
 }
 
+
+proc tvfs::isfile {name} {
+  foreach filename [Ls] {
+    if {[::file normalize $name] eq [::file normalize $filename]} {
+      return 1
+    }
+  }
+  return 0
+}
 
 #######################
 # Internal commands

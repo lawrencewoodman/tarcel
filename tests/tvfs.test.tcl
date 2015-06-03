@@ -295,6 +295,144 @@ test file-exists-2 {Ensure that 'file exists' returns when files aren't found} -
 } -result {0}
 
 
+test file-exists-3 {Ensure that 'file exists' handles file normalization} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  file exists [file join lib .. lib modules greeterInternal-0.1.tm]
+} -cleanup {
+  ::tarcel::launcher::finish
+} -result {1}
+
+
+test file-isfile-1 {Ensure that 'file isfile' returns if a location is a file} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  file isfile [file join lib modules greeterInternal-0.1.tm]
+} -cleanup {
+  ::tarcel::launcher::finish
+} -result {1}
+
+
+test file-isfile-2 {Ensure that 'file isfile' returns 0 if a location is a directory} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  file isfile [file join lib modules]
+} -cleanup {
+  ::tarcel::launcher::finish
+} -result {0}
+
+
+test file-isfile-3 {Ensure that 'file isfile' returns 0 if location doesn't exist} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set archive [TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  file isfile bob
+} -cleanup {
+  ::tarcel::launcher::finish
+} -result {0}
+
+
+test file-isfile-4 {Ensure that 'file isfile' handles file normalization} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  file isfile [file join lib .. lib modules greeterInternal-0.1.tm]
+} -cleanup {
+  ::tarcel::launcher::finish
+} -result {1}
+
+
 test glob-1 {Ensure that glob -directory works on encoded files} -setup {
   ::tarcel::launcher::init
   ::tarcel::launcher::loadSources
