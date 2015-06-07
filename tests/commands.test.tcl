@@ -47,8 +47,8 @@ test info-1 {Ensure lists files in tarcel} -setup {
   }
 
   set config [::tarcel::Config new]
-  set tarcel [compiler::compile [$config parse $manifest]]
-  set tempFilename [TestHelpers::writeToTempFile $tarcel]
+  lassign [compiler::compile [$config parse $manifest]] startScript tarball
+  set tempFilename [TestHelpers::writeTarcelToTempFile $startScript $tarball]
   cd $startDir
   set infoScript [
     string map [list @tempFilename $tempFilename] $infoScript
@@ -67,6 +67,7 @@ test info-1 {Ensure lists files in tarcel} -setup {
          lib/commands.tcl \
          lib/embeddedchan.tcl \
          lib/launcher.tcl \
+         lib/parameters.tcl \
          lib/tar.tcl \
          lib/tararchive.tcl \
          lib/tvfs.tcl \
@@ -103,8 +104,8 @@ test info-2 {Ensure lists homepage set in tarcel} -setup {
   }
 
   set config [::tarcel::Config new]
-  set tarcel [compiler::compile [$config parse $manifest]]
-  set tempFilename [TestHelpers::writeToTempFile $tarcel]
+  lassign [compiler::compile [$config parse $manifest]] startScript tarball
+  set tempFilename [TestHelpers::writeTarcelToTempFile $startScript $tarball]
   cd $startDir
   set infoScript [
     string map [list @tempFilename $tempFilename] $infoScript
@@ -147,8 +148,8 @@ test info-3 {Ensure lists version set in tarcel} -setup {
   }
 
   set config [::tarcel::Config new]
-  set tarcel [compiler::compile [$config parse $manifest]]
-  set tempFilename [TestHelpers::writeToTempFile $tarcel]
+  lassign [compiler::compile [$config parse $manifest]] startScript tarball
+  set tempFilename [TestHelpers::writeTarcelToTempFile $startScript $tarball]
   cd $startDir
   set infoScript [
     string map [list @tempFilename $tempFilename] $infoScript

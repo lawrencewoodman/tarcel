@@ -66,6 +66,7 @@ namespace eval ::tarcel {
 
   proc tar::extractTarballFromFile {filename} {
     set fd [open $filename r]
+    fconfigure $fd -translation binary
     set contents [read $fd]
     close $fd
     extractTarball $contents

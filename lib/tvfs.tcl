@@ -34,7 +34,9 @@ proc tvfs::glob {args} {
   set switchesWithoutValue {-join -nocomplain -tails}
   set result [list]
 
-  lassign [GetSwitches $switchesWithValue $switchesWithoutValue {*}$args] \
+  lassign [::tarcel::parameters::getSwitches $switchesWithValue \
+                                             $switchesWithoutValue \
+                                             {*}$args] \
           switches \
           patterns
 
@@ -64,7 +66,9 @@ proc tvfs::load {args} {
   set switchesWithoutValue {-global -lazy --}
   set result [list]
 
-  lassign [GetSwitches {} $switchesWithoutValue {*}$args] \
+  lassign [::tarcel::parameters::getSwitches {} \
+                                             $switchesWithoutValue \
+                                             {*}$args] \
           switches \
           argsLeft
 
@@ -110,7 +114,11 @@ proc tvfs::file {args} {
 
 proc tvfs::source {args} {
   set switchesWithValue {-encoding}
-  lassign [GetSwitches $switchesWithValue {} {*}$args] switches argsLeft
+  lassign [::tarcel::parameters::getSwitches $switchesWithValue \
+                                             {} \
+                                             {*}$args] \
+          switches \
+          argsLeft
 
   if {[llength $argsLeft] != 1} {
     MasterHidden source {*}$args
@@ -283,32 +291,6 @@ proc tvfs::GlobInDir {switches directory patterns} {
   }
 
   return $result
-}
-
-
-proc tvfs::GetSwitches {switchesWithValue switchesWithoutValue args} {
-  set switches [dict create]
-  set numArgs [llength $args]
-
-  for {set argNum 0} {$argNum < $numArgs} {incr argNum} {
-    set arg [lindex $args $argNum]
-    if {![string match {-*} $arg]} {
-      break
-    }
-
-    if {$arg in $switchesWithValue && ($argNum + 1 < $numArgs)} {
-      set nextArg [lindex $args [expr {$argNum + 1}]]
-      dict set switches $arg $nextArg
-      incr argNum
-    } elseif {$arg in $switchesWithoutValue} {
-      dict set switches $arg 1
-    } else {
-      return -code error "invalid switch"
-    }
-  }
-
-  set argsLeft [lrange $args $argNum end]
-  return [list $switches $argsLeft]
 }
 
 

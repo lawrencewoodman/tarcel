@@ -21,7 +21,7 @@ test parse-tarcel-1 {Ensure that tarcel will use a tarcel manifesto to tarcel fi
   set startDir [pwd]
   cd $FixturesDir
 
-  set manifest {
+  set dotTarcel {
     tarcel [file join eater eater.tarcel] modules
 
     init {
@@ -30,8 +30,12 @@ test parse-tarcel-1 {Ensure that tarcel will use a tarcel manifesto to tarcel fi
     }
   }
   set config [::tarcel::Config new]
-  set tarcel [compiler::compile [$config parse $manifest]]
-  set tempFilename [TestHelpers::writeToTempFile $tarcel]
+  lassign [compiler::compile [$config parse $dotTarcel]] \
+          startScript \
+          tarball
+  set tempFilename [
+    TestHelpers::writeTarcelToTempFile $startScript $tarball
+  ]
   set int [interp create]
 } -body {
   $int eval source $tempFilename

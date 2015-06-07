@@ -17,9 +17,11 @@ proc TestHelpers::fileCompare {filename fileContents} {
 }
 
 
-proc TestHelpers::writeToTempFile {contents} {
+proc TestHelpers::writeTarcelToTempFile {startScript tarball} {
   set fd [file tempfile filename]
-  puts -nonewline $fd $contents
+  puts -nonewline $fd $startScript
+  fconfigure $fd -translation binary
+  puts -nonewline $fd $tarball
   close $fd
   return $filename
 }

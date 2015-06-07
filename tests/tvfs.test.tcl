@@ -15,6 +15,7 @@ proc ::tarcel::launcher::loadSources {} {
   ::tarcel::launcher::eval {
     set ThisScriptDir [file dirname [info script]]
     set LibDir [file join $ThisScriptDir .. lib]
+    source [file join $LibDir "parameters.tcl"]
     source [file join $LibDir "embeddedchan.tcl"]
     source [file join $LibDir "tar.tcl"]
     source [file join $LibDir "tararchive.tcl"]

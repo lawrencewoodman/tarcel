@@ -17,7 +17,10 @@ namespace eval ::tarcel {
   proc commands::info {tarball} {
     set info [dict create]
     dict set info filenames [lsort [::tarcel::tar getFilenames $tarball]]
-    set configInfo [::tarcel::tar getFile $tarball config/info]
+    set configInfo {}
+    if {[::tarcel::tar exists $tarball config/info]} {
+      set configInfo [::tarcel::tar getFile $tarball config/info]
+    }
     dict merge $info $configInfo
   }
 
@@ -27,6 +30,7 @@ namespace eval ::tarcel {
     if {![namespace exists ::tarcel::launcher]} {
       eval [::tarcel::tar::getFile $tarball lib/launcher.tcl]
       ::tarcel::launcher::init
+      ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/parameters.tcl]
       ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/embeddedchan.tcl]
       ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/tar.tcl]
       ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/tararchive.tcl]

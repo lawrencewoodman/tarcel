@@ -3,13 +3,13 @@ package require tcltest
 package require fileutil
 namespace import tcltest::*
 
-# Add module dir to tm paths
 set ThisScriptDir [file dirname [info script]]
 set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
 
 source [file join $ThisScriptDir "test_helpers.tcl"]
+source [file join $LibDir "parameters.tcl"]
 source [file join $LibDir "tar.tcl"]
 source [file join $LibDir "tararchive.tcl"]
 source [file join $LibDir "embeddedchan.tcl"]
@@ -35,8 +35,8 @@ test compile-1 {Ensure that you can access the files in the tarcel from the init
     }
   }
   set config [::tarcel::Config new]
-  set tarcel [compiler::compile [$config parse $manifest]]
-  set tempFilename [TestHelpers::writeToTempFile $tarcel]
+  lassign [compiler::compile [$config parse $manifest]] startScript tarball
+  set tempFilename [TestHelpers::writeTarcelToTempFile $startScript $tarball]
   set int [interp create]
 } -body {
   $int eval source $tempFilename
@@ -50,7 +50,7 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
   set startDir [pwd]
   cd $FixturesDir
 
-  set announcerManifest {
+  set announcerDotTarcel {
     set files [list \
       [file join announcer announcer.tcl] \
     ]
@@ -61,7 +61,7 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
       source [file join lib announcer announcer.tcl]
     }
   }
-  set eaterManifest {
+  set eaterDotTarcel {
     set appFiles [list \
       [file join eater eater.tcl] \
       [file join eater lib foodplurals.tcl]
@@ -83,15 +83,21 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
   file mkdir $tmpDir
   set eaterConfig [::tarcel::Config new]
   set announcerConfig [::tarcel::Config new]
-  set eaterManifest [string map [list @tmpDir $tmpDir] $eaterManifest]
-  set announcerTarcel [
-    compiler::compile [$announcerConfig parse $announcerManifest]
-  ]
+  set eaterDotTarcel [string map [list @tmpDir $tmpDir] $eaterDotTarcel]
+  lassign [compiler::compile [$announcerConfig parse $announcerDotTarcel]] \
+          announcerStartScript \
+          announcerTarball
   set fd [open [file join $tmpDir announcer-0.1.tm] w]
-  puts $fd $announcerTarcel
+  puts -nonewline $fd $announcerStartScript
+  fconfigure $fd -translation binary
+  puts -nonewline $fd $announcerTarball
   close $fd
-  set eaterTarcel [compiler::compile [$eaterConfig parse $eaterManifest]]
-  set tempEaterFilename [TestHelpers::writeToTempFile $eaterTarcel]
+  lassign [compiler::compile [$eaterConfig parse $eaterDotTarcel]] \
+          eaterStartScript \
+          eaterTarball
+  set tempEaterFilename [
+    TestHelpers::writeTarcelToTempFile $eaterStartScript $eaterTarball
+  ]
   set int [interp create]
 } -body {
   $int eval source $tempEaterFilename
@@ -99,6 +105,44 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
   interp delete $int
   cd $startDir
 } -result {ANNOUNCE: I like eating oranges}
+
+
+if {![TestHelpers::makeLibWelcome]} {
+  puts stderr "Skipping test compile-3 as couldn't build libwelcome"
+  skip compile-3
+}
+
+
+test compile-3 {Ensure can 'package require' a module/tarcel that is made from a shared library} -setup {
+  set startDir [pwd]
+  cd $FixturesDir
+
+  set mainDotTarcel {
+    tarcel [file join @FixturesDir libwelcome welcome.tarcel] modules
+
+    init {
+      ::tcl::tm::path add modules
+      package require welcome
+      welcome fred
+    }
+  }
+  set mainDotTarcel [
+    string map [list @FixturesDir $FixturesDir] $mainDotTarcel
+  ]
+  set mainConfig [::tarcel::Config new]
+  lassign [compiler::compile [$mainConfig parse $mainDotTarcel]] \
+          mainStartScript \
+          mainTarball
+  set mainFilename [
+    TestHelpers::writeTarcelToTempFile $mainStartScript $mainTarball
+  ]
+  set int [interp create]
+} -body {
+  $int eval source $mainFilename
+} -cleanup {
+  interp delete $int
+  cd $startDir
+} -result {Welcome fred}
 
 
 cleanupTests

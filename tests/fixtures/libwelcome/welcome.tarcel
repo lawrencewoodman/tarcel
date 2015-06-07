@@ -1,0 +1,19 @@
+set version 0.1
+set outputFilename "welcome-$version.tm"
+set libFilename libwelcome.so
+
+if {[llength [glob -nocomplain $libFilename]] == 1} {
+  fetch $libFilename $outputFilename
+} else {
+  error "Can't find package: welcome"
+}
+
+set initScript {
+  load [file join @outputFilename @libFilename]
+}
+
+init [string map [list @outputFilename $outputFilename \
+                       @libFilename $libFilename] \
+                 $initScript]
+
+config set outputFilename $outputFilename

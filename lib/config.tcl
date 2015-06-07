@@ -20,8 +20,10 @@ namespace import configurator::*
     set selfObject [self object]
     set exposeCmds {
       if if
+      glob glob
       lassign lassign
       list list
+      llength llength
       lsort lsort
       regexp regexp
       regsub regsub
@@ -74,7 +76,10 @@ namespace import configurator::*
       cd $startDir
     }
 
-    set tarcel [compiler::compile -nostartupcode $childConfigSettings]
+    lassign [compiler::compile -nostartupcode $childConfigSettings] \
+            startScript \
+            tarball
+    set tarcel [string cat $startScript $tarball]
     set archive [dict get $config archive]
     set childOutputFilename [
       file join $destination [dict get $childConfigSettings outputFilename]
