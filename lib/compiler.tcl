@@ -28,7 +28,8 @@ proc compiler::compile {args} {
   set mainTarball [$archive export]
   set initTarball [MakeInitTarball $mainTarball $config $incStartupCode]
 
-  set startScript [IncludeFile [file join $LibDir tar.tcl]]
+  set startScript [IncludeFile [file join $LibDir xplatform.tcl]]
+  append startScript [IncludeFile [file join $LibDir tar.tcl]]
   append startScript "namespace eval ::tarcel {\n"
   append startScript "  variable tarball \[::tarcel::tar::extractTarballFromFile "
   append startScript "\[info script\]\]\n"
@@ -90,6 +91,7 @@ proc compiler::MakeInitTarball {mainTarball config includeStartupCode} {
       main.tar $mainTarball \
       config/info [MakeInfo $config] \
       lib/parameters.tcl [ReadFile [file join $LibDir parameters.tcl]] \
+      lib/xplatform.tcl [ReadFile [file join $LibDir xplatform.tcl]] \
       lib/launcher.tcl [ReadFile [file join $LibDir launcher.tcl]] \
       lib/embeddedchan.tcl [ReadFile [file join $LibDir embeddedchan.tcl]] \
       lib/tar.tcl [ReadFile [file join $LibDir tar.tcl]] \

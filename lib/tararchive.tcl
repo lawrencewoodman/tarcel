@@ -6,6 +6,7 @@
 #
 
 namespace import ::tarcel::tar
+namespace import ::tarcel::xplatform::*
 
 ::oo::class create ::tarcel::TarArchive {
   variable files
@@ -69,17 +70,17 @@ namespace import ::tarcel::tar
 
 
   method ls {} {
-    dict keys $files
+    lmap filename [dict keys $files] {unixToLocalFilename $filename}
   }
 
 
   method exists {filename} {
-    dict exists $files $filename
+    dict exists $files [toUnixFilename $filename]
   }
 
 
   method read {filename} {
-    dict get $files $filename
+    dict get $files [toUnixFilename $filename]
   }
 
 

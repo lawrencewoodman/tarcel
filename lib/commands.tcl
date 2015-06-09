@@ -31,6 +31,7 @@ namespace eval ::tarcel {
       eval [::tarcel::tar::getFile $tarball lib/launcher.tcl]
       ::tarcel::launcher::init
       ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/parameters.tcl]
+      ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/xplatform.tcl]
       ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/embeddedchan.tcl]
       ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/tar.tcl]
       ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/tararchive.tcl]

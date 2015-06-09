@@ -8,6 +8,7 @@ set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
 
 source [file join $ThisScriptDir "test_helpers.tcl"]
+source [file join $LibDir "xplatform.tcl"]
 source [file join $LibDir "tar.tcl"]
 source [file join $LibDir "tararchive.tcl"]
 source [file join $LibDir "embeddedchan.tcl"]
@@ -40,6 +41,7 @@ test info-1 {Ensure lists files in tarcel} -setup {
   set infoScript {
     set ThisDir [file dirname [info script]]
     set LibDir [file join $ThisDir .. lib]
+    source [file join $LibDir xplatform.tcl]
     source [file join $LibDir tar.tcl]
     set tarball [::tarcel::tar::extractTarballFromFile @tempFilename]
     eval [::tarcel::tar::getFile $tarball lib/commands.tcl]
@@ -71,6 +73,7 @@ test info-1 {Ensure lists files in tarcel} -setup {
          lib/tar.tcl \
          lib/tararchive.tcl \
          lib/tvfs.tcl \
+         lib/xplatform.tcl \
          main.tar
   ]
 ]
@@ -97,6 +100,7 @@ test info-2 {Ensure lists homepage set in tarcel} -setup {
   set infoScript {
     set ThisDir [file dirname [info script]]
     set LibDir [file join $ThisDir .. lib]
+    source [file join $LibDir xplatform.tcl]
     source [file join $LibDir tar.tcl]
     set tarball [::tarcel::tar::extractTarballFromFile @tempFilename]
     eval [::tarcel::tar::getFile $tarball lib/commands.tcl]
@@ -141,6 +145,7 @@ test info-3 {Ensure lists version set in tarcel} -setup {
   set infoScript {
     set ThisDir [file dirname [info script]]
     set LibDir [file join $ThisDir .. lib]
+    source [file join $LibDir xplatform.tcl]
     source [file join $LibDir tar.tcl]
     set tarball [::tarcel::tar::extractTarballFromFile @tempFilename]
     eval [::tarcel::tar::getFile $tarball lib/commands.tcl]

@@ -1,14 +1,24 @@
+# Tarball handling funcitons
+#
+# Copyright (C) 2015 Lawrence Woodman <lwoodman@vlifesystems.com>
+#
+# Licensed under an MIT licence.  Please see LICENCE.md for details.
+#
+
 namespace eval ::tarcel {
 
   namespace eval tar {
     namespace export {[a-z]*}
     namespace ensemble create
+    namespace import ::tarcel::xplatform::toUnixFilename
   }
+
 
   proc tar::create {_files} {
     set tarball ""
     dict for {filename contents} $_files {
-      append tarball [MakeHeader $filename $contents]
+      set unixFilename [toUnixFilename $filename]
+      append tarball [MakeHeader $unixFilename $contents]
       append tarball [MakeFileRecords $contents]
     }
 
@@ -18,11 +28,12 @@ namespace eval ::tarcel {
 
   proc tar::getFile {tarball requestFilename} {
     set pos 0
+    set unixRequestFilename [toUnixFilename $requestFilename]
 
     while {1} {
       lassign [ReadNextFile $tarball $pos] filename contents pos
       if {$filename eq ""} {break}
-      if {$filename eq $requestFilename} {
+      if {$filename eq $unixRequestFilename} {
         return $contents
       }
     }
@@ -33,11 +44,12 @@ namespace eval ::tarcel {
 
   proc tar::exists {tarball checkFilename} {
     set pos 0
+    set unixCheckFilename [toUnixFilename $checkFilename]
 
     while {1} {
       lassign [ReadNextFile $tarball $pos] filename contents pos
       if {$filename eq ""} {break}
-      if {$filename eq $checkFilename} {
+      if {$filename eq $unixCheckFilename} {
         return 1
       }
     }
@@ -76,6 +88,7 @@ namespace eval ::tarcel {
   #############################
   # Internal commands
   #############################
+
   proc tar::ReadNextFile {tarball pos} {
     lassign [ReadHeader $tarball $pos] filename filesize pos
     if {$filename eq ""} {return {{} 0 0}}

@@ -3,6 +3,7 @@
 package require fileutil
 
 namespace eval TestHelpers {
+  variable fileSeparator [file separator]
 }
 
 proc TestHelpers::fileCompare {filename fileContents} {
@@ -14,6 +15,26 @@ proc TestHelpers::fileCompare {filename fileContents} {
   } else {
     return -1
   }
+}
+
+
+rename file TestHelpers::OldFile
+interp alias {} file {} TestHelpers::File
+proc TestHelpers::changeFileSeparator {style} {
+  variable fileSeparator
+  if {$style eq "windows"} {
+    set fileSeparator "\\"
+  } elseif {$style eq "unix"} {
+    set fileSeparator {/}
+  } else {
+    return -code error "style not recognized: $style"
+  }
+}
+
+
+proc TestHelpers::resetFileSeparator {} {
+  variable fileSeparator
+  set fileSeparator [TestHelpers::OldFile separator]
 }
 
 
@@ -80,6 +101,19 @@ proc TestHelpers::makeLibWelcome {} {
 
   cd $startDir
   return $buildSuccess
+}
+
+
+proc TestHelpers::File {args} {
+  variable fileSeparator
+  if {[lindex $args] >= 1} {
+    lassign $args command
+    switch $command {
+      separator {return $fileSeparator}
+      join {return [join [lrange $args 1 end] $fileSeparator]}
+    }
+  }
+  uplevel 1 TestHelpers::OldFile {*}$args
 }
 
 
