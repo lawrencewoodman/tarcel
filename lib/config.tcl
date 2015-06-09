@@ -19,8 +19,9 @@ namespace import configurator::*
   method parse {script} {
     set selfObject [self object]
     set exposeCmds {
-      if if
+      foreach foreach
       glob glob
+      if if
       lassign lassign
       list list
       llength llength
@@ -138,6 +139,7 @@ namespace import configurator::*
 
   method File {interp command args} {
     switch $command {
+      dirname { return [::file dirname {*}$args] }
       join { return [::file join {*}$args] }
       tail { return [::file tail {*}$args] }
       default {
