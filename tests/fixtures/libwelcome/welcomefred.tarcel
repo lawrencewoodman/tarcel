@@ -1,6 +1,6 @@
 tarcel welcome.tarcel modules
 
-init {
+config set init {
   ::tcl::tm::path add modules
   package require welcome
   puts [welcome fred]

@@ -12,4 +12,4 @@ set initScript {
   source [file join @outputFilename eater.tcl]
 }
 
-init [string map [list @outputFilename $outputFilename] $initScript]
+config set init [string map [list @outputFilename $outputFilename] $initScript]

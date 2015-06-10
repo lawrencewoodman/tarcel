@@ -12,8 +12,8 @@ set initScript {
   load [file join @outputFilename @libFilename]
 }
 
-init [string map [list @outputFilename $outputFilename \
-                       @libFilename $libFilename] \
-                 $initScript]
+config set init [string map [list @outputFilename $outputFilename \
+                                  @libFilename $libFilename] \
+                            $initScript]
 
 config set outputFilename $outputFilename

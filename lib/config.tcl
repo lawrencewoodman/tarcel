@@ -39,7 +39,6 @@ namespace import configurator::*
       find [list ${selfObject}::my Find] \
       get [list ${selfObject}::my Get] \
       import [list ${selfObject}::my Import] \
-      init [list ${selfObject}::my Init] \
       tarcel [list ${selfObject}::my Tarcel]
     ]
 
@@ -97,12 +96,17 @@ namespace import configurator::*
     set invalidVarnames {archive}
     switch $command {
       set {
+        if {[llength $args] != 2} {
+          return -code error \
+                 "wrong # of arguments, should be: config set varName value"
+        }
         lassign $args varName value
         if {$varName in $invalidVarnames} {
           return -code error "invalid variable for config set: $varName"
         }
         dict set config $varName $value
       }
+
       default {
         return -code error "invalid config command: $command"
       }
@@ -117,11 +121,6 @@ namespace import configurator::*
         return -code error "invalid command: get $what $args"
       }
     }
-  }
-
-
-  method Init {interp script} {
-    my Config $interp set init $script
   }
 
 

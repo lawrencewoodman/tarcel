@@ -23,7 +23,7 @@ fetch $modules modules
 config set version 0.1
 config set homepage "https://github.com/LawrenceWoodman/tarcel"
 
-init {
+config set init {
   ::tcl::tm::path add modules
   source [file join lib app tarcel.tcl]
 }

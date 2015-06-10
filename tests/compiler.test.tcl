@@ -30,7 +30,7 @@ test compile-1 {Ensure that you can access the files in the tarcel from the init
 
     import $appFiles [file join lib]
 
-    init {
+    config set init {
       source [file join lib eater eater.tcl]
       eat orange
     }
@@ -58,7 +58,7 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
 
     import $files [file join lib]
 
-    init {
+    config set init {
       source [file join lib announcer announcer.tcl]
     }
   }
@@ -73,7 +73,7 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
     import $appFiles [file join lib]
     fetch $modules modules
 
-    init {
+    config set init {
       ::tcl::tm::path add modules
       package require announcer
       source [file join lib eater eater.tcl]
@@ -121,7 +121,7 @@ test compile-3 {Ensure can 'package require' a module/tarcel that is made from a
   set mainDotTarcel {
     tarcel [file join @FixturesDir libwelcome welcome.tarcel] modules
 
-    init {
+    config set init {
       ::tcl::tm::path add modules
       package require welcome
       welcome fred

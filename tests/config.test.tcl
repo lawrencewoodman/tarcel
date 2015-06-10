@@ -25,7 +25,7 @@ test parse-tarcel-1 {Ensure that tarcel will use a tarcel manifesto to tarcel fi
   set dotTarcel {
     tarcel [file join eater eater.tarcel] modules
 
-    init {
+    config set init {
       source [file join modules eater-0.1.tm]
       eat orange
     }
@@ -53,7 +53,7 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
   set manifest {
     tarcel [file join eater eater.tarcel] modules
 
-    init {
+    config set init {
       source [file join modules eater-0.1.tm]
       eat orange
     }
