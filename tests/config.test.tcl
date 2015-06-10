@@ -70,6 +70,34 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
 } -result {config/init.tcl lib/commands.tcl main.tar}
 
 
+test parse-tarcel-3 {Ensure that tarcel will allow you to pass arguments to args in dot tarcel file} -setup {
+  set startDir [pwd]
+  cd $FixturesDir
+
+  set dotTarcel {
+    tarcel modules [file join whatargs.tarcel] a b 5 6 c d
+
+    config set init {
+      source [file join modules whatargs.tcl]
+      whatArgs
+    }
+  }
+  set config [::tarcel::Config new]
+  lassign [compiler::compile [$config parse $dotTarcel]] \
+          startScript \
+          tarball
+  set tempFilename [
+    TestHelpers::writeTarcelToTempFile $startScript $tarball
+  ]
+  set int [interp create]
+} -body {
+  $int eval source $tempFilename
+} -cleanup {
+  interp delete $int
+  cd $startDir
+} -result {args: a b 5 6 c d}
+
+
 test parse-find-module-1 {Ensure that requirements can be used to find module} -setup {
   set dotTarcel {
     set modules [list \

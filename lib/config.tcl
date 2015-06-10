@@ -61,10 +61,11 @@ namespace import configurator::*
   # Private methods
   ########################
 
-  method Tarcel {interp destination tarcelManifestFilename} {
+  method Tarcel {interp destination tarcelManifestFilename args} {
     set startDir [pwd]
     set fd [open $tarcelManifestFilename r]
-    set tarcelManifest [read $fd]
+    set tarcelManifest "set args \[list {*}$args\]\n"
+    append tarcelManifest [read $fd]
     close $fd
 
     set childConfig [::tarcel::Config new]

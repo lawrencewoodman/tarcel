@@ -1,0 +1,6 @@
+set initScript {
+  proc whatArgs {} {return "args: @args"}
+}
+
+config set outputFilename whatargs.tcl
+config set init [string map [list @args $args] $initScript]
