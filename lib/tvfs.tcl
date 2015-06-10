@@ -13,7 +13,6 @@ namespace eval tvfs {
   variable masterEvalCmd
   variable masterHiddenCmd
   variable masterTransferChanCmd
-  set mounts [list]
   namespace export open source file glob
 }
 
@@ -23,6 +22,7 @@ proc tvfs::init {_masterEvalCmd _masterHiddenCmd _masterTransferChanCmd} {
   variable masterEvalCmd
   variable masterHiddenCmd
   variable masterTransferChanCmd
+  set mounts [list]
   set masterEvalCmd $_masterEvalCmd
   set masterHiddenCmd $_masterHiddenCmd
   set masterTransferChanCmd $_masterTransferChanCmd
@@ -159,8 +159,7 @@ proc tvfs::open {args} {
 
 proc tvfs::mount {archive mountPoint} {
   variable mounts
-# TODO: Need to make mount relative to something, perhaps pwd or perhaps script file
-  lappend mounts [list $mountPoint $archive]
+  lappend mounts [list [file normalize $mountPoint] $archive]
 }
 
 
@@ -264,8 +263,8 @@ proc tvfs::MasterHidden {args} {
 
 
 proc tvfs::GlobInDir {switches directory patterns} {
-  set directory [::file split [::file normalize $directory]]
-  set lastDirectoryPartIndex [expr {[llength $directory] - 1}]
+  set splitDirectory [::file split [::file normalize $directory]]
+  set lastDirectoryPartIndex [expr {[llength $splitDirectory] - 1}]
   set result [list]
 
   set vFilenames [Ls]
@@ -275,7 +274,7 @@ proc tvfs::GlobInDir {switches directory patterns} {
       lrange $splitVFilename 0 $lastDirectoryPartIndex
     ]
 
-    if {$directory == $possibleCommonDir} {
+    if {$splitDirectory == $possibleCommonDir} {
       set comparePart [
         ::file join [lrange $splitVFilename \
                           [expr {$lastDirectoryPartIndex+1}] \
@@ -284,7 +283,7 @@ proc tvfs::GlobInDir {switches directory patterns} {
 
       foreach pattern $patterns {
         if {[string match $pattern $comparePart]} {
-          lappend result $vFilename
+          lappend result [file join $directory [file tail $vFilename]]
         }
       }
     }
@@ -297,17 +296,19 @@ proc tvfs::GlobInDir {switches directory patterns} {
 proc tvfs::FilenameToArchiveFilename {filename} {
   variable mounts
 
+  set normalizedFilename [::file normalize $filename]
+  set splitNormalizedFilename [::file split $normalizedFilename]
   foreach mount $mounts {
     lassign $mount mountPoint archive
-    if {[DoCommonNamePartsMatch $mountPoint $filename]} {
-      set normalizedFilename [::file split [::file normalize $filename]]
-      set normalizedMountPoint [::file split [::file normalize $mountPoint]]
+    if {[DoCommonNamePartsMatch $mountPoint $normalizedFilename]} {
+      set splitNormalizedMountPoint [
+        ::file split [::file normalize $mountPoint]
+      ]
       set archiveFilename [
-        ::file join {*}[lrange $normalizedFilename \
-                               [llength $normalizedMountPoint] \
+        ::file join {*}[lrange $splitNormalizedFilename \
+                               [llength $splitNormalizedMountPoint] \
                                end]
       ]
-
       if {[$archive exists $archiveFilename]} {
         return [list $archive $archiveFilename]
       }

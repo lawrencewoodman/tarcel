@@ -156,6 +156,49 @@ test source-3 {Ensure that package require for a module inside the tarcel works}
 } -result {hello fred (from internal greeter)}
 
 
+test source-4 {Ensure that package require for a module inside the tarcel works with a fully normalized tm path} -setup {
+  TestHelpers::allowPackageRerequire greeterInternal
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      package require greeterInternal
+      namespace import greeterInternal::*
+      hello fred
+    }
+
+    set greeterInternalScript {
+      namespace eval greeterInternal {
+        namespace export {[a-z]*}
+      }
+
+
+      proc greeterInternal::hello {who} {
+        return "hello $who (from internal greeter)"
+      }
+    }
+
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  ::tcl::tm::path add [file normalize [file join lib modules]]
+  source [file normalize [file join lib app main.tcl]]
+} -cleanup {
+  ::tcl::tm::path remove [file join lib modules]
+  ::tarcel::launcher::finish
+  namespace delete ::greeterInternal
+  TestHelpers::resetPackageRerequire
+} -result {hello fred (from internal greeter)}
+
+
 test open-1 {Ensure that read works correctly for files when no count given} -setup {
   ::tarcel::launcher::init
   ::tarcel::launcher::loadSources
@@ -323,6 +366,67 @@ test file-exists-3 {Ensure that 'file exists' handles file normalization} -setup
   file exists [file join lib .. lib modules greeterInternal-0.1.tm]
 } -cleanup {
   ::tarcel::launcher::finish
+} -result {1}
+
+
+test file-exists-4 {Ensure that 'file exists' can look for a fully normalized filename} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  file exists [file normalize [file join lib modules greeterInternal-0.1.tm]]
+} -cleanup {
+  ::tarcel::launcher::finish
+} -result {1}
+
+
+test file-exists-5 {Ensure that 'file exists' handles files relative to mount point} -setup {
+  set startDir [pwd]
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+  cd $FixturesDir
+} -body {
+  file exists [file normalize [file join .. .. lib modules greeterInternal-0.1.tm]]
+} -cleanup {
+  ::tarcel::launcher::finish
+  cd $startDir
 } -result {1}
 
 

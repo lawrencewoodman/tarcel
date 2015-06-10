@@ -4,6 +4,7 @@ package require fileutil
 
 namespace eval TestHelpers {
   variable fileSeparator [file separator]
+  variable reRequirePackages [list]
 }
 
 proc TestHelpers::fileCompare {filename fileContents} {
@@ -35,6 +36,20 @@ proc TestHelpers::changeFileSeparator {style} {
 proc TestHelpers::resetFileSeparator {} {
   variable fileSeparator
   set fileSeparator [TestHelpers::OldFile separator]
+}
+
+
+rename package TestHelpers::OldPackage
+interp alias {} package {} TestHelpers::Package
+proc TestHelpers::allowPackageRerequire {packages} {
+  variable reRequirePackages
+  set reRequirePackages $packages
+}
+
+
+proc TestHelpers::resetPackageRerequire {} {
+  variable reRequirePackages
+  set reRequirePackages [list]
 }
 
 
@@ -106,6 +121,7 @@ proc TestHelpers::makeLibWelcome {} {
 
 proc TestHelpers::File {args} {
   variable fileSeparator
+
   if {[lindex $args] >= 1} {
     lassign $args command
     switch $command {
@@ -113,7 +129,27 @@ proc TestHelpers::File {args} {
       join {return [join [lrange $args 1 end] $fileSeparator]}
     }
   }
+
   uplevel 1 TestHelpers::OldFile {*}$args
+}
+
+
+proc TestHelpers::Package {args} {
+  variable reRequirePackages
+
+  if {[llength $args] == 2 && [lindex $args 0] eq "require"} {
+    set packageName [lindex $args 1]
+    if {$packageName in $reRequirePackages} {
+      set version [
+        uplevel #0 [list TestHelpers::OldPackage require $packageName]
+      ]
+      set ifneeded [package ifneeded $packageName $version]
+      uplevel #0 $ifneeded
+      return $version
+    }
+  }
+
+  uplevel 1 [list TestHelpers::OldPackage {*}$args]
 }
 
 
