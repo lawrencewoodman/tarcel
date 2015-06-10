@@ -1,4 +1,4 @@
-tarcel welcome.tarcel modules
+tarcel modules welcome.tarcel
 
 config set init {
   ::tcl::tm::path add modules

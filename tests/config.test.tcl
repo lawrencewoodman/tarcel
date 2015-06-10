@@ -23,7 +23,7 @@ test parse-tarcel-1 {Ensure that tarcel will use a tarcel manifesto to tarcel fi
   cd $FixturesDir
 
   set dotTarcel {
-    tarcel [file join eater eater.tarcel] modules
+    tarcel modules [file join eater eater.tarcel]
 
     config set init {
       source [file join modules eater-0.1.tm]
@@ -51,7 +51,7 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
   cd $FixturesDir
 
   set manifest {
-    tarcel [file join eater eater.tarcel] modules
+    tarcel modules [file join eater eater.tarcel]
 
     config set init {
       source [file join modules eater-0.1.tm]

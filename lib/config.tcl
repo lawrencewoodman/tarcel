@@ -61,7 +61,7 @@ namespace import configurator::*
   # Private methods
   ########################
 
-  method Tarcel {interp tarcelManifestFilename destination} {
+  method Tarcel {interp destination tarcelManifestFilename} {
     set startDir [pwd]
     set fd [open $tarcelManifestFilename r]
     set tarcelManifest [read $fd]

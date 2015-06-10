@@ -119,7 +119,7 @@ test compile-3 {Ensure can 'package require' a module/tarcel that is made from a
   cd $FixturesDir
 
   set mainDotTarcel {
-    tarcel [file join @FixturesDir libwelcome welcome.tarcel] modules
+    tarcel modules [file join @FixturesDir libwelcome welcome.tarcel]
 
     config set init {
       ::tcl::tm::path add modules
