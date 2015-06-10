@@ -70,4 +70,34 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
 } -result {config/init.tcl lib/commands.tcl main.tar}
 
 
+test parse-find-module-1 {Ensure that requirements can be used to find module} -setup {
+  set dotTarcel {
+    set modules [list \
+      [find module number 0.2-0.3]
+    ]
+
+
+    fetch $modules modules
+    config set init {
+      source [file join modules number-0.2.5.tm]
+      number
+    }
+  }
+  ::tcl::tm::path add [file normalize $FixturesDir]
+  set config [::tarcel::Config new]
+  lassign [compiler::compile [$config parse $dotTarcel]] \
+          startScript \
+          tarball
+  set tempFilename [
+    TestHelpers::writeTarcelToTempFile $startScript $tarball
+  ]
+  set int [interp create]
+} -body {
+  $int eval source $tempFilename
+} -cleanup {
+  interp delete $int
+  ::tcl::tm::path remove [file normalize $FixturesDir]
+} -result {I'm number 0.2.5}
+
+
 cleanupTests

@@ -158,9 +158,9 @@ namespace import configurator::*
   }
 
 
-# TODO: Add version number handling
   method FindModule {args} {
-    lassign $args moduleName destination
+    lassign $args moduleName
+    set requirements [lrange $args 1 end]
     set dirPrefix [regsub {^(.*?)([^:]+)$} $moduleName {\1}]
     set dirPrefix [regsub {::} $dirPrefix [file separator]]
     set tailModuleName [regsub {^(.*?)([^:]+)$} $moduleName {\2}]
@@ -175,6 +175,10 @@ namespace import configurator::*
       foreach moduleFilename $possibleModules {
         set tailFoundModule [file tail $moduleFilename]
         set version [regsub {^(.*?)-(.*?)\.tm$} $tailFoundModule {\2}]
+        if {[llength $requirements] >= 1 &&
+            ![package vsatisfies $version {*}$requirements]} {
+          continue
+        }
         lappend foundModules [list $moduleFilename $version]
       }
     }
