@@ -58,7 +58,7 @@ proc tvfs::glob {args} {
     }
   }
 
-  return $result
+  return [lsort -unique $result]
 }
 
 
@@ -212,7 +212,7 @@ proc tvfs::Ls {} {
 }
 
 
-proc tvfs::DoCommonNamePartsMatch {name1 name2} {
+proc tvfs::GetCommonNameParts {name1 name2} {
   set normalizedName1 [::file split [::file normalize $name1]]
   set normalizedName2 [::file split [::file normalize $name2]]
   set lastIndexName1 [expr {[llength $normalizedName1] - 1}]
@@ -220,7 +220,16 @@ proc tvfs::DoCommonNamePartsMatch {name1 name2} {
   set lastCommonIndex [expr {min($lastIndexName1, $lastIndexName2)}]
   set commonName1 [lrange $normalizedName1 0 $lastCommonIndex]
   set commonName2 [lrange $normalizedName2 0 $lastCommonIndex]
-  expr {$commonName1 == $commonName2}
+  if {$commonName1 == $commonName2} {
+    return $commonName1
+  }
+  return {}
+}
+
+
+proc tvfs::DoCommonNamePartsMatch {name1 name2} {
+  set commonNameParts [GetCommonNameParts $name1 $name2]
+  expr {$commonNameParts != {}}
 }
 
 
@@ -263,27 +272,43 @@ proc tvfs::MasterHidden {args} {
 
 
 proc tvfs::GlobInDir {switches directory patterns} {
-  set splitDirectory [::file split [::file normalize $directory]]
-  set lastDirectoryPartIndex [expr {[llength $splitDirectory] - 1}]
+  set normalizedDirectory [::file normalize $directory]
   set result [list]
-
   set vFilenames [Ls]
+
+  # Files
   foreach vFilename $vFilenames {
-    set splitVFilename [::file split [::file normalize $vFilename]]
-    set possibleCommonDir [
-      lrange $splitVFilename 0 $lastDirectoryPartIndex
-    ]
-
-    if {$splitDirectory == $possibleCommonDir} {
-      set comparePart [
-        ::file join [lrange $splitVFilename \
-                          [expr {$lastDirectoryPartIndex+1}] \
-                          end]
-      ]
-
+    set vFilename [::file normalize $vFilename]
+    if {[::file dirname $vFilename] eq $normalizedDirectory} {
       foreach pattern $patterns {
-        if {[string match $pattern $comparePart]} {
-          lappend result [file join $directory [file tail $vFilename]]
+        if {[string match $pattern [::file tail $vFilename]]} {
+          lappend result [file join $directory [::file tail $vFilename]]
+        }
+      }
+    }
+  }
+
+  # Directories
+  foreach vFilename $vFilenames {
+    set vFilename [::file normalize $vFilename]
+    set commonParts [GetCommonNameParts $vFilename $normalizedDirectory]
+    set nextPartVFilenameIndex [llength $commonParts]
+    set nextPartVFilename [
+      lindex [::file split $vFilename] $nextPartVFilenameIndex
+    ]
+    set vFilenameSplit [::file split $vFilename]
+    set isDirectory [
+      expr {$nextPartVFilenameIndex < [llength $vFilenameSplit] - 1}
+    ]
+    set dirName [::file join $directory $nextPartVFilename]
+    if {[lsearch $result $dirName] == -1 &&
+        $isDirectory &&
+        [llength $commonParts] >= 1} {
+      if {[::file join {*}$commonParts] eq $normalizedDirectory} {
+        foreach pattern $patterns {
+          if {[string match $pattern $nextPartVFilename]} {
+            lappend result $dirName
+          }
         }
       }
     }

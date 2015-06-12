@@ -591,10 +591,10 @@ test glob-2 {Ensure that glob -directory works with -nocomplain} -setup {
   }
   ::tarcel::launcher::createAliases
 } -body {
-  file exists [file join lib modules bob]
+  glob -nocomplain -directory [file join lib modules] bob
 } -cleanup {
   ::tarcel::launcher::finish
-} -result {0}
+} -result {}
 
 
 
@@ -625,6 +625,123 @@ test glob-3 {Ensure that glob -directory complains if nothing found and -nocompl
 } -cleanup {
   ::tarcel::launcher::finish
 } -result {no files matched glob pattern "*.fred"} -returnCodes {error}
+
+
+test glob-4 {Ensure that glob -directory compares the directory properly, so that it doesn't match part of the directory and then use the filename tail for the pattern match} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  expr {"./greeterInternal-0.1.tm" ni [glob -directory . *]}
+} -cleanup {
+  ::tarcel::launcher::finish
+} -result {1}
+
+
+test glob-5 {Ensure that glob -directory returns directory names} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  glob -directory [file join lib app] *
+} -cleanup {
+  ::tarcel::launcher::finish
+} -result [list [file join lib app main]]
+
+
+test glob-6 {Ensure that glob -directory returns a directory name only once} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set hello2Script {
+      hello
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main main.tcl]
+    $archive importContents $hello2Script [file join lib app main hello2.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  glob -directory [file join lib app] *
+} -cleanup {
+  ::tarcel::launcher::finish
+} -result [list [file join lib app main]]
+
+
+test glob-7 {Ensure that glob -directory doesn't repeat entries found in real fs and virtual fs} -setup {
+  set startDir [pwd]
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      hello
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join tests app main main.tcl]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+  cd [file join $ThisScriptDir ..]
+} -body {
+  llength [lsearch -all [glob -directory . *] ./tests]
+} -cleanup {
+  ::tarcel::launcher::finish
+  cd $startDir
+} -result 1
 
 
 if {![TestHelpers::makeLibWelcome]} {
