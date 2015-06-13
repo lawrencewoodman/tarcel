@@ -29,8 +29,8 @@ test info-1 {Ensure lists files in tarcel} -setup {
       [find module configurator]
     ]
 
-    import $appFiles [file join lib]
-    fetch $modules modules
+    import [file join lib] $appFiles
+    fetch modules $modules
 
     config set init {
       source [file join lib eater eater.tcl]
@@ -89,7 +89,7 @@ test info-2 {Ensure lists homepage set in tarcel} -setup {
       [file join eater lib foodplurals.tcl]
     ]
     config set homepage "http://example.com/tarcel"
-    import $appFiles [file join lib]
+    import [file join lib] $appFiles
 
     config set init {
       source [file join lib eater eater.tcl]
@@ -134,7 +134,7 @@ test info-3 {Ensure lists version set in tarcel} -setup {
       [file join eater lib foodplurals.tcl]
     ]
     config set version 0.1
-    import $appFiles [file join lib]
+    import [file join lib] $appFiles
 
     config set init {
       source [file join lib eater eater.tcl]

@@ -17,8 +17,8 @@ set modules [list \
 ]
 
 
-import $appFiles [file join lib app]
-fetch $modules modules
+import [file join lib app] $appFiles
+fetch modules $modules
 
 config set version 0.1
 config set homepage "https://github.com/LawrenceWoodman/tarcel"

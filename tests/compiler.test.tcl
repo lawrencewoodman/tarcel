@@ -28,7 +28,7 @@ test compile-1 {Ensure that you can access the files in the tarcel from the init
       [file join eater lib foodplurals.tcl]
     ]
 
-    import $appFiles [file join lib]
+    import [file join lib] $appFiles
 
     config set init {
       source [file join lib eater eater.tcl]
@@ -56,7 +56,7 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
       [file join announcer announcer.tcl] \
     ]
 
-    import $files [file join lib]
+    import [file join lib] $files
 
     config set init {
       source [file join lib announcer announcer.tcl]
@@ -70,8 +70,8 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
 
     set modules [list [file join @tmpDir announcer-0.1.tm]]
 
-    import $appFiles [file join lib]
-    fetch $modules modules
+    import [file join lib] $appFiles
+    fetch modules $modules
 
     config set init {
       ::tcl::tm::path add modules

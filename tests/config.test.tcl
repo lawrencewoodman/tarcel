@@ -105,7 +105,7 @@ test parse-find-module-1 {Ensure that requirements can be used to find module} -
     ]
 
 
-    fetch $modules modules
+    fetch modules $modules
     config set init {
       source [file join modules number-0.2.5.tm]
       number

@@ -3,7 +3,7 @@ set outputFilename "welcome-$version.tm"
 set libFilename libwelcome.so
 
 if {[llength [glob -nocomplain $libFilename]] == 1} {
-  fetch $libFilename $outputFilename
+  fetch $outputFilename $libFilename
 } else {
   error "Can't find package: welcome"
 }

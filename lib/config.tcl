@@ -125,13 +125,13 @@ namespace import configurator::*
   }
 
 
-  method Import {interp files importPoint} {
+  method Import {interp importPoint files} {
     set archive [dict get $config archive]
     $archive importFiles $files $importPoint
   }
 
 
-  method Fetch {interp files importPoint} {
+  method Fetch {interp importPoint files} {
     set archive [dict get $config archive]
     $archive fetchFiles $files $importPoint
   }

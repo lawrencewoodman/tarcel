@@ -4,7 +4,7 @@ set files [list \
 ]
 
 set outputFilename "eater-0.1.tm"
-import $files $outputFilename
+import $outputFilename $files
 
 config set outputFilename $outputFilename
 
