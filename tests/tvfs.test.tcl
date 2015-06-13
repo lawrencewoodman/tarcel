@@ -2,7 +2,8 @@ package require Tcl 8.6
 package require tcltest
 namespace import tcltest::*
 
-set ThisScriptDir [file dirname [info script]]
+set ThisScriptDir [file normalize [file dirname [info script]]]
+set RootDir [file join $ThisScriptDir ..]
 set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
@@ -12,9 +13,9 @@ source [file join $ThisScriptDir "test_helpers.tcl"]
 
 
 proc ::tarcel::launcher::loadSources {} {
-  ::tarcel::launcher::eval {
-    set ThisScriptDir [file dirname [info script]]
-    set LibDir [file join $ThisScriptDir .. lib]
+  global ThisScriptDir
+  set script {
+    set LibDir [file join @ThisScriptDir .. lib]
     source [file join $LibDir "parameters.tcl"]
     source [file join $LibDir "xplatform.tcl"]
     source [file join $LibDir "embeddedchan.tcl"]
@@ -22,6 +23,9 @@ proc ::tarcel::launcher::loadSources {} {
     source [file join $LibDir "tararchive.tcl"]
     source [file join $LibDir "tvfs.tcl"]
   }
+  ::tarcel::launcher::eval [
+    string map [list @ThisScriptDir $ThisScriptDir] $script
+  ]
 }
 
 
@@ -400,6 +404,7 @@ test file-exists-4 {Ensure that 'file exists' can look for a fully normalized fi
 
 test file-exists-5 {Ensure that 'file exists' handles files relative to mount point} -setup {
   set startDir [pwd]
+  cd $RootDir
   ::tarcel::launcher::init
   ::tarcel::launcher::loadSources
   ::tarcel::launcher::eval {
@@ -754,7 +759,7 @@ test load-1 {Ensure can load a library from within tarcel} -setup {
   ::tarcel::launcher::loadSources
   ::tarcel::launcher::eval {
     set thisDir [file dirname [info script]]
-    set files [list [file join tests fixtures libwelcome libwelcome.so]]
+    set files [list [file join $thisDir fixtures libwelcome libwelcome.so]]
     set archive [::tarcel::TarArchive new]
     $archive fetchFiles $files lib
     tvfs::init ::tarcel::evalInMaster \
