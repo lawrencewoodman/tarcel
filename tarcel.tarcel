@@ -16,14 +16,18 @@ set modules [list \
   [find module configurator]
 ]
 
+set baseDir tarcel.vfs
 
-import [file join lib app] $appFiles
-fetch modules $modules
+
+import [file join $baseDir app] $appFiles
+fetch [file join $baseDir modules] $modules
 
 config set version 0.1
 config set homepage "https://github.com/LawrenceWoodman/tarcel"
 
-config set init {
-  ::tcl::tm::path add modules
-  source [file join lib app tarcel.tcl]
+set initScript {
+  ::tcl::tm::path add [file join @baseDir modules]
+  source [file join @baseDir app tarcel.tcl]
 }
+
+config set init [string map [list @baseDir $baseDir] $initScript]
