@@ -203,6 +203,42 @@ test source-4 {Ensure that package require for a module inside the tarcel works 
 } -result {hello fred (from internal greeter)}
 
 
+test source-5 {Ensure that source works properly when called within a proc} -setup {
+  ::tarcel::launcher::init
+  ::tarcel::launcher::loadSources
+  ::tarcel::launcher::eval {
+    set mainScript {
+      proc main {} {
+        set ThisDir [file dirname [info script]]
+        source [file join $ThisDir setaScript.tcl]
+        return "a: $a"
+      }
+    }
+    set setaScript {
+      set a 5
+    }
+
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript \
+                            [file join lib app main.tcl]
+    $archive importContents $setaScript \
+                            [file join lib app setaScript.tcl]
+    tvfs::init ::tarcel::evalInMaster \
+               ::tarcel::invokeHiddenInMaster \
+               ::tarcel::transferChanToMaster
+    tvfs::mount $archive .
+  }
+  ::tarcel::launcher::createAliases
+} -body {
+  namespace eval aTester {
+    source [file join lib app main.tcl]
+  }
+} -cleanup {
+  ::tarcel::launcher::finish
+  namespace delete aTester
+} -result "a: 5"
+
+
 test open-1 {Ensure that read works correctly for files when no count given} -setup {
   ::tarcel::launcher::init
   ::tarcel::launcher::loadSources
