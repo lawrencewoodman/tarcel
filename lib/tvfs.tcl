@@ -138,7 +138,7 @@ namespace eval ::tarcel {
             argsLeft
 
     if {[llength $argsLeft] != 1} {
-      oldSource {*}$args
+      uplevel 1 ::tarcel::tvfs::oldSource {*}$args
     }
 
     set filename $argsLeft
@@ -154,7 +154,7 @@ namespace eval ::tarcel {
       set res [uplevel 1 $contents]
       uplevel 1 info script $callingScript
     } else {
-      set res [uplevel 1 oldSource {*}$args]
+      set res [uplevel 1 ::tarcel::tvfs::oldSource {*}$args]
     }
 
     return $res

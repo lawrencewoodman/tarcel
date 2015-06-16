@@ -3,6 +3,7 @@ package require tcltest
 namespace import tcltest::*
 
 set ThisScriptDir [file normalize [file dirname [info script]]]
+set FixturesDir [file join $ThisScriptDir fixtures]
 
 source [file join $ThisScriptDir "test_helpers.tcl"]
 
@@ -195,6 +196,21 @@ test source-5 {Ensure that source works properly when called within a proc} -set
 } -cleanup {
   interp delete $int
 } -result "a: 5"
+
+
+test source-6 {Ensure that source can return an error correctly from original source} -setup {
+  set int [interp create]
+  TestHelpers::loadSourcesInInterp $int
+  $int eval {
+    ::tarcel::tvfs::init
+  }
+} -body {
+  $int eval [string map [list @FixturesDir $FixturesDir] {
+    source [file join @FixturesDir nothere.tcl]
+  }]
+} -cleanup {
+  interp delete $int
+} -returnCodes {error} -result "couldn't read file \"[file join $FixturesDir nothere.tcl]\": no such file or directory"
 
 
 test open-1 {Ensure that read works correctly for files when no count given} -setup {
