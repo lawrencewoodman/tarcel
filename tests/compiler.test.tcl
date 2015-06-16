@@ -1,6 +1,5 @@
 package require Tcl 8.6
 package require tcltest
-package require fileutil
 namespace import tcltest::*
 
 set ThisScriptDir [file dirname [info script]]
@@ -80,8 +79,7 @@ test compile-2 {Ensure can source a tarcelled file} -setup {
       announce [eat orange]
     }
   }
-  set tmpDir [file join [::fileutil::tempdir] tarcelTest_[clock milliseconds]]
-  file mkdir $tmpDir
+  set tmpDir [TestHelpers::makeTempDir]
   set eaterConfig [::tarcel::Config new]
   set announcerConfig [::tarcel::Config new]
   set eaterDotTarcel [string map [list @tmpDir $tmpDir] $eaterDotTarcel]

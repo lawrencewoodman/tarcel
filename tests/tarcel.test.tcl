@@ -1,6 +1,5 @@
 package require Tcl 8.6
 package require tcltest
-package require fileutil
 namespace import tcltest::*
 
 set ThisScriptDir [file dirname [info script]]
