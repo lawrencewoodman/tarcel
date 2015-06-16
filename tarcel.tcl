@@ -79,6 +79,7 @@ proc handleParameters {parameters} {
 
 
 proc wrap {dotTarcelFilename {outputFilename {}}} {
+  set startDir [pwd]
   cd [file dirname $dotTarcelFilename]
   set config [::tarcel::Config new]
   set configSettings [$config load [file tail $dotTarcelFilename]]
@@ -94,6 +95,7 @@ proc wrap {dotTarcelFilename {outputFilename {}}} {
   }
 
   lassign [compiler::compile $configSettings] startScript tarball
+  cd $startDir
   set fd [open $outputFilename w]
   puts -nonewline $fd $startScript
   fconfigure $fd -translation binary

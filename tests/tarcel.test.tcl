@@ -46,5 +46,19 @@ test wrap-2 {Ensure can wrap itself and then wrap something else} -setup {
 } -result {Hello bob, how are you?}
 
 
-cleanupTests
+test wrap-3 {Ensure that output file is relative to pwd} -setup {
+  set startDir [pwd]
+  set tempDir [TestHelpers::makeTempDir]
+  cd $tempDir
 
+  exec tclsh [file join $TarcelDir tarcel.tcl] wrap \
+             -o h.tcl \
+             [file join $FixturesDir hello hello.tarcel]
+} -body {
+  file exists h.tcl
+} -cleanup {
+  cd $startDir
+} -result 1
+
+
+cleanupTests
