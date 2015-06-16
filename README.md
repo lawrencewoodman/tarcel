@@ -1,6 +1,6 @@
 tarcel
 ======
-A tcl packaging tool
+A Tcl packaging tool
 
 Tarcel allows you to combine a number of files together to create a single tarcel file that can ben run by tclsh, wish, or can be sourced into another tcl script.
 
