@@ -26,20 +26,20 @@ namespace eval ::tarcel {
 
 
   proc commands::launch {tarball} {
-    if {![namespace exists ::tvfs]} {
+    if {![namespace exists ::tarcel::tvfs]} {
       uplevel 1 [::tarcel::tar::getFile $tarball lib/parameters.tcl]
       uplevel 1 [::tarcel::tar::getFile $tarball lib/xplatform.tcl]
       uplevel 1 [::tarcel::tar::getFile $tarball lib/embeddedchan.tcl]
       uplevel 1 [::tarcel::tar::getFile $tarball lib/tar.tcl]
       uplevel 1 [::tarcel::tar::getFile $tarball lib/tararchive.tcl]
       uplevel 1 [::tarcel::tar::getFile $tarball lib/tvfs.tcl]
-      tvfs::init
+      ::tarcel::tvfs::init
     }
 
     set mainTarball [::tarcel::tar::getFile $tarball main.tar]
     set archive [::tarcel::TarArchive new]
     $archive load $mainTarball
-    tvfs::mount $archive .
+    ::tarcel::tvfs::mount $archive .
 
     if {[::tarcel::tar::exists $tarball config/init.tcl]} {
       uplevel 1 [::tarcel::tar::getFile $tarball config/init.tcl]

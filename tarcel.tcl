@@ -9,7 +9,7 @@
 set ThisScriptDir [file dirname [info script]]
 set LibDir [file join $ThisScriptDir lib]
 
-if {![namespace exists ::tvfs]} {
+if {![namespace exists ::tarcel::tvfs]} {
   source [file join $LibDir parameters.tcl]
   source [file join $LibDir xplatform.tcl]
   source [file join $LibDir tar.tcl]

@@ -17,9 +17,9 @@ test mount-1 {Ensure that you can mount multiple archives at same mount point} -
     set archiveB [::tarcel::TarArchive new]
     $archiveA importContents $textA [file join text texta.txt]
     $archiveB importContents $textB [file join text textb.txt]
-    tvfs::init
-    tvfs::mount $archiveA .
-    tvfs::mount $archiveB .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archiveA .
+    ::tarcel::tvfs::mount $archiveB .
   }
 } -body {
   $int eval {
@@ -51,8 +51,8 @@ test source-1 {Ensure that info script returns correct location when an encoded 
                             [file join lib app info_script_a.tcl]
     $archive importContents $infoScriptBScript \
                             [file join lib app lib info_script_b.tcl]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -75,8 +75,8 @@ test source-2 {Ensure that package require for a module outside of the tarcel wo
     }
     set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
     ::tcl::tm::path add $FixturesDir
   }
 } -body {
@@ -113,8 +113,8 @@ test source-3 {Ensure that package require for a module inside the tarcel works}
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
     ::tcl::tm::path add [file join lib modules]
   }
 } -body {
@@ -151,8 +151,8 @@ test source-4 {Ensure that package require for a module inside the tarcel works 
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
     ::tcl::tm::path add [file normalize [file join lib modules]]
   }
 } -body {
@@ -185,8 +185,8 @@ test source-5 {Ensure that source works properly when called within a proc} -set
                             [file join lib app main.tcl]
     $archive importContents $setaScript \
                             [file join lib app setaScript.tcl]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -207,8 +207,8 @@ test open-1 {Ensure that read works correctly for files when no count given} -se
     }
     set archive [::tarcel::TarArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -232,8 +232,8 @@ test open-2 {Ensure that read works correct for files when count given} -setup {
     set niceDayText {This is a very nice day}
     set archive [::tarcel::TarArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
     set result [list]
   }
 } -body {
@@ -259,8 +259,8 @@ test open-3 {Ensure that gets works correctly for files} -setup {
       and so is this}
     set archive [::tarcel::TarArchive new]
     $archive importContents $niceDayText [file join text nice_day.txt]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
     set result [list]
   }
 } -body {
@@ -293,8 +293,8 @@ test file-exists-1 {Ensure that 'file exists' finds directories within directory
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -321,8 +321,8 @@ test file-exists-2 {Ensure that 'file exists' returns when files aren't found} -
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -349,8 +349,8 @@ test file-exists-3 {Ensure that 'file exists' handles file normalization} -setup
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -377,8 +377,8 @@ test file-exists-4 {Ensure that 'file exists' can look for a fully normalized fi
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -409,8 +409,8 @@ test file-exists-5 {Ensure that 'file exists' handles files relative to mount po
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
     cd $FixturesDir
   }
 } -body {
@@ -443,8 +443,8 @@ test file-isfile-1 {Ensure that 'file isfile' returns if a location is a file} -
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -471,8 +471,8 @@ test file-isfile-2 {Ensure that 'file isfile' returns 0 if a location is a direc
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -492,8 +492,8 @@ test file-isfile-3 {Ensure that 'file isfile' returns 0 if location doesn't exis
     }
     set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join lib app main.tcl]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -520,8 +520,8 @@ test file-isfile-4 {Ensure that 'file isfile' handles file normalization} -setup
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -548,8 +548,8 @@ test glob-1 {Ensure that glob -directory works on encoded files} -setup {
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -576,8 +576,8 @@ test glob-2 {Ensure that glob -directory works with -nocomplain} -setup {
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -605,8 +605,8 @@ test glob-3 {Ensure that glob -directory complains if nothing found and -nocompl
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -633,8 +633,8 @@ test glob-4 {Ensure that glob -directory compares the directory properly, so tha
     $archive importContents $mainScript [file join lib app main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -661,8 +661,8 @@ test glob-5 {Ensure that glob -directory returns directory names} -setup {
     $archive importContents $mainScript [file join lib app main main.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -694,8 +694,8 @@ test glob-6 {Ensure that glob -directory returns a directory name only once} -se
     $archive importContents $hello2Script [file join lib app main hello2.tcl]
     $archive importContents $greeterInternalScript \
                             [file join lib modules greeterInternal-0.1.tm]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
@@ -716,8 +716,8 @@ test glob-7 {Ensure that glob -directory doesn't repeat entries found in real fs
     }
     set archive [::tarcel::TarArchive new]
     $archive importContents $mainScript [file join tests app main main.tcl]
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
   cd [file join $ThisScriptDir ..]
 } -body {
@@ -743,8 +743,8 @@ test load-1 {Ensure can load a library from within tarcel} -setup {
     set files [list [file join $thisDir fixtures libwelcome libwelcome.so]]
     set archive [::tarcel::TarArchive new]
     $archive fetchFiles $files lib
-    tvfs::init
-    tvfs::mount $archive .
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
   }
 } -body {
   $int eval {
