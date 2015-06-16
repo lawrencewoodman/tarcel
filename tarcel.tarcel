@@ -15,13 +15,14 @@ set modules [list \
   [find module configurator]
 ]
 
-set baseDir tarcel.vfs
+set version 0.1
+set baseDir tarcel-$version.vfs
 
 
 import [file join $baseDir app] $appFiles
 fetch [file join $baseDir modules] $modules
 
-config set version 0.1
+config set version $version
 config set homepage "https://github.com/LawrenceWoodman/tarcel"
 
 set initScript {
