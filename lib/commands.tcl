@@ -16,7 +16,8 @@ namespace eval ::tarcel {
 
   proc commands::info {tarball} {
     set info [dict create]
-    dict set info filenames [lsort [::tarcel::tar getFilenames $tarball]]
+    set mainTarball [::tarcel::tar::getFile $tarball main.tar]
+    dict set info filenames [lsort [::tarcel::tar getFilenames $mainTarball]]
     set configInfo {}
     if {[::tarcel::tar exists $tarball config/info]} {
       set configInfo [::tarcel::tar getFile $tarball config/info]

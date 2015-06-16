@@ -64,16 +64,9 @@ test info-1 {Ensure lists files in tarcel} -setup {
   cd $startDir
 } -result [
   dict create filenames [
-    list config/info \
-         config/init.tcl \
-         lib/commands.tcl \
-         lib/embeddedchan.tcl \
-         lib/parameters.tcl \
-         lib/tar.tcl \
-         lib/tararchive.tcl \
-         lib/tvfs.tcl \
-         lib/xplatform.tcl \
-         main.tar
+    list lib/eater/eater.tcl \
+         lib/eater/lib/foodplurals.tcl \
+         modules/configurator-0.1.tm
   ]
 ]
 
