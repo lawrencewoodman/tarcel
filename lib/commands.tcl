@@ -25,32 +25,21 @@ namespace eval ::tarcel {
   }
 
 
-  proc commands::launch {} {
-    set tarball ${::tarcel::tarball}
-    if {![namespace exists ::tarcel::launcher]} {
-      eval [::tarcel::tar::getFile $tarball lib/launcher.tcl]
-      ::tarcel::launcher::init
-      ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/parameters.tcl]
-      ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/xplatform.tcl]
-      ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/embeddedchan.tcl]
-      ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/tar.tcl]
-      ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/tararchive.tcl]
-      ::tarcel::launcher::eval [::tarcel::tar::getFile $tarball lib/tvfs.tcl]
-      ::tarcel::launcher::eval {
-        tvfs::init ::tarcel::evalInMaster \
-                   ::tarcel::invokeHiddenInMaster \
-                   ::tarcel::transferChanToMaster
-      }
-      ::tarcel::launcher::createAliases
+  proc commands::launch {tarball} {
+    if {![namespace exists ::tvfs]} {
+      uplevel 1 [::tarcel::tar::getFile $tarball lib/parameters.tcl]
+      uplevel 1 [::tarcel::tar::getFile $tarball lib/xplatform.tcl]
+      uplevel 1 [::tarcel::tar::getFile $tarball lib/embeddedchan.tcl]
+      uplevel 1 [::tarcel::tar::getFile $tarball lib/tar.tcl]
+      uplevel 1 [::tarcel::tar::getFile $tarball lib/tararchive.tcl]
+      uplevel 1 [::tarcel::tar::getFile $tarball lib/tvfs.tcl]
+      tvfs::init
     }
 
-    ::tarcel::launcher::eval {
-      set tarball [::tarcel::evalInMaster "uplevel 1 set ::tarcel::tarball"]
-      set mainTarball [::tarcel::tar::getFile $tarball main.tar]
-      set archive [::tarcel::TarArchive new]
-      $archive load $mainTarball
-      tvfs::mount $archive .
-    }
+    set mainTarball [::tarcel::tar::getFile $tarball main.tar]
+    set archive [::tarcel::TarArchive new]
+    $archive load $mainTarball
+    tvfs::mount $archive .
 
     if {[::tarcel::tar::exists $tarball config/init.tcl]} {
       uplevel 1 [::tarcel::tar::getFile $tarball config/init.tcl]

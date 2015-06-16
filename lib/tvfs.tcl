@@ -8,24 +8,39 @@
 # over the functionality of open, source, file and glob to access them.
 #
 
-namespace eval tvfs {
+namespace eval ::tvfs {
   variable mounts [list]
-  variable masterEvalCmd
-  variable masterHiddenCmd
-  variable masterTransferChanCmd
-  namespace export open source file glob
+  namespace export file glob load open source
 }
 
 
-proc tvfs::init {_masterEvalCmd _masterHiddenCmd _masterTransferChanCmd} {
+proc tvfs::init {} {
   variable mounts
-  variable masterEvalCmd
-  variable masterHiddenCmd
-  variable masterTransferChanCmd
   set mounts [list]
-  set masterEvalCmd $_masterEvalCmd
-  set masterHiddenCmd $_masterHiddenCmd
-  set masterTransferChanCmd $_masterTransferChanCmd
+  rename ::file ::tvfs::oldFile
+  rename ::glob ::tvfs::oldGlob
+  rename ::load ::tvfs::oldLoad
+  rename ::open ::tvfs::oldOpen
+  rename ::source ::tvfs::oldSource
+  uplevel #0 namespace import ::tvfs::file \
+                              ::tvfs::glob \
+                              ::tvfs::load \
+                              ::tvfs::open \
+                              ::tvfs::source
+}
+
+
+proc tvfs::finish {} {
+  uplevel #0 namespace forget ::tvfs::file \
+                              ::tvfs::glob \
+                              ::tvfs::load \
+                              ::tvfs::open \
+                              ::tvfs::source
+  rename tvfs::oldFile ::file
+  rename tvfs::oldGlob ::glob
+  rename tvfs::oldLoad ::load
+  rename tvfs::oldOpen ::open
+  rename tvfs::oldSource ::source
 }
 
 
@@ -47,7 +62,7 @@ proc tvfs::glob {args} {
 
   try {
     set result [
-      list {*}$result {*}[MasterHidden glob {*}$args]
+      list {*}$result {*}[::tvfs::oldGlob {*}$args]
     ]
   } on error {errorMsg options} {
     if {[string match {no files matched glob pattern*} $errorMsg] &&
@@ -73,7 +88,7 @@ proc tvfs::load {args} {
           argsLeft
 
   if {[llength $argsLeft] < 1 || [llength $argsLeft] > 3} {
-    MasterHidden load {*}$args
+    ::tvfs::oldLoad {*}$args
   }
 
   lassign $argsLeft filename
@@ -81,14 +96,14 @@ proc tvfs::load {args} {
   if {[exists $filename]} {
     set libFileContents [read $filename]
     set tempDir [MakeTempDir]
-    set tempLibFilename [::file join $tempDir [::file tail $filename]]
+    set tempLibFilename [oldFile join $tempDir [oldFile tail $filename]]
     set fd [::open $tempLibFilename w]
     fconfigure $fd -translation binary
     puts -nonewline $fd $libFileContents
     close $fd
-    MasterHidden load $tempLibFilename {*}$argsLeft
+    ::tvfs::oldLoad $tempLibFilename {*}$argsLeft
   } else {
-    MasterHidden load $filename {*}$argsLeft
+    ::tvfs::oldLoad $filename {*}$argsLeft
   }
 }
 
@@ -108,7 +123,7 @@ proc tvfs::file {args} {
       }
     }
   }
-  ::file {*}$args
+  oldFile {*}$args
 }
 
 
@@ -121,23 +136,23 @@ proc tvfs::source {args} {
           argsLeft
 
   if {[llength $argsLeft] != 1} {
-    MasterHidden source {*}$args
+    ::tvfs::oldSource {*}$args
   }
 
   set filename $argsLeft
   set contents [ReadTclFile $filename]
   if {$contents ne {}} {
-    set callingScript [MasterEval info script]
-    MasterEval info script $filename
+    set callingScript [uplevel 1 info script]
+    uplevel 1 info script $filename
     if {[dict exist $switches -encoding]} {
       set contents [
         encoding convertfrom [dict get $switches -encoding] $contents
       ]
     }
-    set res [MasterEval $contents]
-    MasterEval info script $callingScript
+    set res [uplevel 1 $contents]
+    uplevel 1 info script $callingScript
   } else {
-    set res [MasterHidden source {*}$args]
+    set res [uplevel 1 ::tvfs::oldSource {*}$args]
   }
 
   return $res
@@ -149,17 +164,16 @@ proc tvfs::open {args} {
   if {[exists $filename]} {
     set contents [read $filename]
     set fd [embeddedChan::open $contents]
-    MasterTransferChan $fd
     return $fd
   } else {
-    MasterHidden open {*}$args
+    ::tvfs::oldOpen {*}$args
   }
 }
 
 
 proc tvfs::mount {archive mountPoint} {
   variable mounts
-  lappend mounts [list [file normalize $mountPoint] $archive]
+  lappend mounts [list [oldFile normalize $mountPoint] $archive]
 }
 
 
@@ -182,7 +196,7 @@ proc tvfs::exists {name} {
 
 proc tvfs::isfile {name} {
   foreach filename [Ls] {
-    if {[::file normalize $name] eq [::file normalize $filename]} {
+    if {[oldFile normalize $name] eq [oldFile normalize $filename]} {
       return 1
     }
   }
@@ -203,7 +217,7 @@ proc tvfs::Ls {} {
       if {$mountPoint eq "."} {
         lappend result $filename
       } else {
-        lappend result [::file join $mountPoint $filename]
+        lappend result [oldFile join $mountPoint $filename]
       }
     }
   }
@@ -213,8 +227,8 @@ proc tvfs::Ls {} {
 
 
 proc tvfs::GetCommonNameParts {name1 name2} {
-  set normalizedName1 [::file split [::file normalize $name1]]
-  set normalizedName2 [::file split [::file normalize $name2]]
+  set normalizedName1 [oldFile split [oldFile normalize $name1]]
+  set normalizedName2 [oldFile split [oldFile normalize $name2]]
   set lastIndexName1 [expr {[llength $normalizedName1] - 1}]
   set lastIndexName2 [expr {[llength $normalizedName2] - 1}]
   set lastCommonIndex [expr {min($lastIndexName1, $lastIndexName2)}]
@@ -272,17 +286,17 @@ proc tvfs::MasterHidden {args} {
 
 
 proc tvfs::GlobInDir {switches directory patterns} {
-  set normalizedDirectory [::file normalize $directory]
+  set normalizedDirectory [oldFile normalize $directory]
   set result [list]
   set vFilenames [Ls]
 
   # Files
   foreach vFilename $vFilenames {
-    set vFilename [::file normalize $vFilename]
-    if {[::file dirname $vFilename] eq $normalizedDirectory} {
+    set vFilename [oldFile normalize $vFilename]
+    if {[oldFile dirname $vFilename] eq $normalizedDirectory} {
       foreach pattern $patterns {
-        if {[string match $pattern [::file tail $vFilename]]} {
-          lappend result [file join $directory [::file tail $vFilename]]
+        if {[string match $pattern [oldFile tail $vFilename]]} {
+          lappend result [file join $directory [oldFile tail $vFilename]]
         }
       }
     }
@@ -290,21 +304,21 @@ proc tvfs::GlobInDir {switches directory patterns} {
 
   # Directories
   foreach vFilename $vFilenames {
-    set vFilename [::file normalize $vFilename]
+    set vFilename [oldFile normalize $vFilename]
     set commonParts [GetCommonNameParts $vFilename $normalizedDirectory]
     set nextPartVFilenameIndex [llength $commonParts]
     set nextPartVFilename [
-      lindex [::file split $vFilename] $nextPartVFilenameIndex
+      lindex [oldFile split $vFilename] $nextPartVFilenameIndex
     ]
-    set vFilenameSplit [::file split $vFilename]
+    set vFilenameSplit [oldFile split $vFilename]
     set isDirectory [
       expr {$nextPartVFilenameIndex < [llength $vFilenameSplit] - 1}
     ]
-    set dirName [::file join $directory $nextPartVFilename]
+    set dirName [oldFile join $directory $nextPartVFilename]
     if {[lsearch $result $dirName] == -1 &&
         $isDirectory &&
         [llength $commonParts] >= 1} {
-      if {[::file join {*}$commonParts] eq $normalizedDirectory} {
+      if {[oldFile join {*}$commonParts] eq $normalizedDirectory} {
         foreach pattern $patterns {
           if {[string match $pattern $nextPartVFilename]} {
             lappend result $dirName
@@ -321,16 +335,16 @@ proc tvfs::GlobInDir {switches directory patterns} {
 proc tvfs::FilenameToArchiveFilename {filename} {
   variable mounts
 
-  set normalizedFilename [::file normalize $filename]
-  set splitNormalizedFilename [::file split $normalizedFilename]
+  set normalizedFilename [oldFile normalize $filename]
+  set splitNormalizedFilename [oldFile split $normalizedFilename]
   foreach mount $mounts {
     lassign $mount mountPoint archive
     if {[DoCommonNamePartsMatch $mountPoint $normalizedFilename]} {
       set splitNormalizedMountPoint [
-        ::file split [::file normalize $mountPoint]
+        oldFile split [oldFile normalize $mountPoint]
       ]
       set archiveFilename [
-        ::file join {*}[lrange $splitNormalizedFilename \
+        oldFile join {*}[lrange $splitNormalizedFilename \
                                [llength $splitNormalizedMountPoint] \
                                end]
       ]
@@ -345,13 +359,13 @@ proc tvfs::FilenameToArchiveFilename {filename} {
 
 
 proc tvfs::MakeTempDir {} {
-  set fd [::file tempfile mainTempFile]
+  set fd [oldFile tempfile mainTempFile]
   close $fd
-  set mainTempDir [::file dirname $mainTempFile]
+  set mainTempDir [oldFile dirname $mainTempFile]
   while {1} {
     try {
-      set tempDir [::file join $mainTempDir tarcel_tests_[clock milliseconds]]
-      ::file mkdir $tempDir
+      set tempDir [oldFile join $mainTempDir tarcel_tests_[clock milliseconds]]
+      oldFile mkdir $tempDir
       break
     } on error {} {}
   }

@@ -3,7 +3,6 @@ set appFiles [list \
   [file join lib commands.tcl] \
   [file join lib parameters.tcl] \
   [file join lib xplatform.tcl] \
-  [file join lib launcher.tcl] \
   [file join lib config.tcl] \
   [file join lib compiler.tcl] \
   [file join lib tvfs.tcl] \

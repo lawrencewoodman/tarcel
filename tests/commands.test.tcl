@@ -68,7 +68,6 @@ test info-1 {Ensure lists files in tarcel} -setup {
          config/init.tcl \
          lib/commands.tcl \
          lib/embeddedchan.tcl \
-         lib/launcher.tcl \
          lib/parameters.tcl \
          lib/tar.tcl \
          lib/tararchive.tcl \

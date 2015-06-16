@@ -4,6 +4,7 @@ package require fileutil
 namespace import tcltest::*
 
 set ThisScriptDir [file dirname [info script]]
+set RootDir [file join $ThisScriptDir ..]
 set LibDir [file join $ThisScriptDir .. lib]
 set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 set TarcelDir [file normalize [file join $ThisScriptDir ..]]
@@ -29,6 +30,20 @@ test wrap-1 {Ensure can 'package require' a module/tarcel that is made from a sh
 } -cleanup {
   cd $startDir
 } -result {Welcome fred}
+
+
+test wrap-2 {Ensure can wrap itself and then wrap something else} -setup {
+  set tempDir [TestHelpers::makeTempDir]
+
+  exec tclsh [file join $TarcelDir tarcel.tcl] wrap \
+             -o [file join $tempDir t.tcl] \
+             tarcel.tarcel
+  exec tclsh [file join $tempDir t.tcl] wrap \
+             -o [file join $tempDir h.tcl] \
+             [file join $FixturesDir hello hello.tarcel]
+} -body {
+  exec tclsh [file join $tempDir h.tcl]
+} -result {Hello bob, how are you?}
 
 
 cleanupTests

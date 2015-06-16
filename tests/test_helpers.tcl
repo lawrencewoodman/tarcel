@@ -1,10 +1,7 @@
 # Helper functions for the tests
 
-package require fileutil
-
 namespace eval TestHelpers {
   variable fileSeparator [file separator]
-  variable reRequirePackages [list]
 }
 
 proc TestHelpers::fileCompare {filename fileContents} {
@@ -36,20 +33,6 @@ proc TestHelpers::changeFileSeparator {style} {
 proc TestHelpers::resetFileSeparator {} {
   variable fileSeparator
   set fileSeparator [TestHelpers::OldFile separator]
-}
-
-
-rename package TestHelpers::OldPackage
-interp alias {} package {} TestHelpers::Package
-proc TestHelpers::allowPackageRerequire {packages} {
-  variable reRequirePackages
-  set reRequirePackages $packages
-}
-
-
-proc TestHelpers::resetPackageRerequire {} {
-  variable reRequirePackages
-  set reRequirePackages [list]
 }
 
 
@@ -119,6 +102,22 @@ proc TestHelpers::makeLibWelcome {} {
 }
 
 
+proc TestHelpers::loadSourcesInInterp {interp} {
+  $interp eval info script [info script]
+  $interp eval {
+    set ThisScriptDir [file normalize [file dirname [info script]]]
+    set LibDir [file join $ThisScriptDir .. lib]
+    set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
+    source [file join $LibDir "parameters.tcl"]
+    source [file join $LibDir "xplatform.tcl"]
+    source [file join $LibDir "embeddedchan.tcl"]
+    source [file join $LibDir "tar.tcl"]
+    source [file join $LibDir "tararchive.tcl"]
+    source [file join $LibDir "tvfs.tcl"]
+  }
+}
+
+
 proc TestHelpers::File {args} {
   variable fileSeparator
 
@@ -131,41 +130,4 @@ proc TestHelpers::File {args} {
   }
 
   uplevel 1 TestHelpers::OldFile {*}$args
-}
-
-
-proc TestHelpers::Package {args} {
-  variable reRequirePackages
-
-  if {[llength $args] == 2 && [lindex $args 0] eq "require"} {
-    set packageName [lindex $args 1]
-    if {$packageName in $reRequirePackages} {
-      set version [
-        uplevel #0 [list TestHelpers::OldPackage require $packageName]
-      ]
-      set ifneeded [package ifneeded $packageName $version]
-      uplevel #0 $ifneeded
-      return $version
-    }
-  }
-
-  uplevel 1 [list TestHelpers::OldPackage {*}$args]
-}
-
-
-namespace eval ::tarcel::launcher {
-  proc finish {} {
-    variable launcherInt
-    interp alias {} ::open {}
-    interp alias {} ::source {}
-    interp alias {} ::file {}
-    interp alias {} ::glob {}
-    interp alias {} ::load {}
-    interp expose {} open
-    interp expose {} source
-    interp expose {} file
-    interp expose {} glob
-    interp expose {} load
-    interp delete $launcherInt
-  }
 }

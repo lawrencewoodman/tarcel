@@ -1,0 +1,14 @@
+set appFiles {
+  hello.tcl
+  lib/sayhello.tcl
+}
+
+set baseDir hello.vfs
+
+import [file join $baseDir lib app] $appFiles
+
+set initScript {
+  source [file join @baseDir lib app hello.tcl]
+}
+
+config set init [string map [list @baseDir $baseDir] $initScript]

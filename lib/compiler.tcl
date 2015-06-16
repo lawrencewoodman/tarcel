@@ -30,16 +30,16 @@ proc compiler::compile {args} {
 
   set startScript [IncludeFile [file join $LibDir xplatform.tcl]]
   append startScript [IncludeFile [file join $LibDir tar.tcl]]
-  append startScript "namespace eval ::tarcel {\n"
-  append startScript "  variable tarball \[::tarcel::tar::extractTarballFromFile "
-  append startScript "\[info script\]\]\n"
 
-  append startScript "  uplevel 1 \[::tarcel::tar::getFile "
-  append startScript "\$tarball lib/commands.tcl\]\n"
-  append startScript "}\n"
-  append startScript "::tarcel::commands::launch\n"
+  append startScript {
+    namespace eval ::tarcel {
+      set tarball [::tarcel::tar::extractTarballFromFile [info script]]
+      uplevel 1 [::tarcel::tar::getFile $tarball lib/commands.tcl]
+    }
+    ::tarcel::commands::launch $::tarcel::tarball]
+  }
+
   append startScript "\u001a"
-
   list $startScript $initTarball
 }
 
@@ -92,7 +92,6 @@ proc compiler::MakeInitTarball {mainTarball config includeStartupCode} {
       config/info [MakeInfo $config] \
       lib/parameters.tcl [ReadFile [file join $LibDir parameters.tcl]] \
       lib/xplatform.tcl [ReadFile [file join $LibDir xplatform.tcl]] \
-      lib/launcher.tcl [ReadFile [file join $LibDir launcher.tcl]] \
       lib/embeddedchan.tcl [ReadFile [file join $LibDir embeddedchan.tcl]] \
       lib/tar.tcl [ReadFile [file join $LibDir tar.tcl]] \
       lib/tararchive.tcl [ReadFile [file join $LibDir tararchive.tcl]] \
