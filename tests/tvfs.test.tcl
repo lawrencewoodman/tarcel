@@ -735,7 +735,7 @@ if {![TestHelpers::makeLibWelcome]} {
   skip load-1
 }
 
-test load-1 {Ensure can load a library from within tarcel} -setup {
+test load-1 {Ensure can load a library from within tarcel in correct namespace} -setup {
   set int [interp create]
   TestHelpers::loadSourcesInInterp $int
   $int eval {
@@ -749,7 +749,7 @@ test load-1 {Ensure can load a library from within tarcel} -setup {
 } -body {
   $int eval {
     load lib/libwelcome.so
-    welcome fred
+    ::welcome::welcome fred
   }
 } -cleanup {
   interp delete $int

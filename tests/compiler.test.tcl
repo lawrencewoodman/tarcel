@@ -124,7 +124,7 @@ test compile-3 {Ensure can 'package require' a module/tarcel that is made from a
     config set init {
       ::tcl::tm::path add modules
       package require welcome
-      welcome fred
+      ::welcome::welcome fred
     }
   }
   set mainDotTarcel [

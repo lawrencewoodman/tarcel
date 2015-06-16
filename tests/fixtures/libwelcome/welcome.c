@@ -27,7 +27,7 @@ int
 Welcome_Init(Tcl_Interp *interp)
 {
 	Tcl_CreateObjCommand(interp,
-                       "welcome",
+                       "welcome::welcome",
                        Welcome,
                       (ClientData) NULL,
                       (Tcl_CmdDeleteProc *) NULL);

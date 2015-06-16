@@ -90,7 +90,7 @@ namespace eval ::tarcel {
             argsLeft
 
     if {[llength $argsLeft] < 1 || [llength $argsLeft] > 3} {
-      oldLoad {*}$args
+      uplevel 1 ::tarcel::tvfs::oldLoad {*}$args
     }
 
     lassign $argsLeft filename
@@ -103,9 +103,9 @@ namespace eval ::tarcel {
       fconfigure $fd -translation binary
       puts -nonewline $fd $libFileContents
       close $fd
-      oldLoad $tempLibFilename {*}$argsLeft
+      uplevel 1 ::tarcel::tvfs::oldLoad $tempLibFilename {*}$argsLeft
     } else {
-      oldLoad $filename {*}$argsLeft
+      uplevel 1 ::tarcel::tvfs::oldLoad $filename {*}$argsLeft
     }
   }
 
