@@ -25,23 +25,23 @@ Usage
 Tarcel is quite easy to use and implements just enough functionality to work for the tasks it has been put to so far.
 
 ### Creating a package ###
-To create a <em>tarcel</em> file you begin by creating a <em>.tarcel</em> file to describe how to package the <em>tarcel</em> file.  See below for what to put in this file.  You then use the <em>wrap</em> command of <em>tarcel.tcl</em> to create the package.
+To create a _tarcel_ file you begin by creating a _.tarcel_ file to describe how to package the _tarcel_ file.  See below for what to put in this file.  You then use the _wrap_ command of _tarcel.tcl_ to create the package.
 
-To create a <em>tarcel</em> called <em>t.tcl</em> out of <em>tarcel.tcl</em> and its associated files using <em>tarcel.tarcel</em> run:
+To create a _tarcel_ called _t.tcl_ out of _tarcel.tcl_ and its associated files using _tarcel.tarcel_ run:
 
     $ tclsh tarcel.tcl wrap -o t.tcl tarcel.tarcel
 
 The <em>.tarcel</em> file may specifiy the output filename, in which case you don't need to supply `-o outputFilename`.
 
 ### Getting Information About a Package ###
-To find out some information about a package use the <em>info</em> command of <em>tarcel.tcl</em>.  For the example above, to look at <em>t.tcl</em> run:
+To find out some information about a package use the _info_ command of _tarcel.tcl_.  For the example above, to look at _t.tcl_ run:
 
     $ tclsh tarcel.tcl info t.tcl
 
 ### Defining a .tarcel File ###
-To begin with it is worth looking at the <em>tarcel.tarcel</em> file supplied in the repo.  This <em>.tarcel</em> file is used to wrap <em>tarcel.tcl</em>.
+To begin with it is worth looking at the _tarcel.tarcel_ file supplied in the repo.  This _.tarcel_ file is used to wrap _tarcel.tcl_.
 
-A <em>.tarcel</em> file is a Tcl script which has the following Tcl commands available to it:
+A _.tarcel_ file is a Tcl script which has the following Tcl commands available to it:
 
 * file (only supports subcommands: dirname, join and tail)
 * foreach
