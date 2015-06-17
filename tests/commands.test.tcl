@@ -20,7 +20,7 @@ test info-1 {Ensure lists files in tarcel} -setup {
   set startDir [pwd]
   cd $FixturesDir
 
-  set manifest {
+  set dotTarcel {
     set appFiles [list \
       [file join eater eater.tcl] \
       [file join eater lib foodplurals.tcl]
@@ -49,7 +49,7 @@ test info-1 {Ensure lists files in tarcel} -setup {
   }
 
   set config [::tarcel::Config new]
-  lassign [compiler::compile [$config parse $manifest]] startScript tarball
+  lassign [compiler::compile [$config parse $dotTarcel]] startScript tarball
   set tempFilename [TestHelpers::writeTarcelToTempFile $startScript $tarball]
   cd $startDir
   set infoScript [
@@ -75,7 +75,7 @@ test info-2 {Ensure lists homepage set in tarcel} -setup {
   set startDir [pwd]
   cd $FixturesDir
 
-  set manifest {
+  set dotTarcel {
     set appFiles [list \
       [file join eater eater.tcl] \
       [file join eater lib foodplurals.tcl]
@@ -100,7 +100,7 @@ test info-2 {Ensure lists homepage set in tarcel} -setup {
   }
 
   set config [::tarcel::Config new]
-  lassign [compiler::compile [$config parse $manifest]] startScript tarball
+  lassign [compiler::compile [$config parse $dotTarcel]] startScript tarball
   set tempFilename [TestHelpers::writeTarcelToTempFile $startScript $tarball]
   cd $startDir
   set infoScript [
@@ -120,7 +120,7 @@ test info-3 {Ensure lists version set in tarcel} -setup {
   set startDir [pwd]
   cd $FixturesDir
 
-  set manifest {
+  set dotTarcel {
     set appFiles [list \
       [file join eater eater.tcl] \
       [file join eater lib foodplurals.tcl]
@@ -145,7 +145,7 @@ test info-3 {Ensure lists version set in tarcel} -setup {
   }
 
   set config [::tarcel::Config new]
-  lassign [compiler::compile [$config parse $manifest]] startScript tarball
+  lassign [compiler::compile [$config parse $dotTarcel]] startScript tarball
   set tempFilename [TestHelpers::writeTarcelToTempFile $startScript $tarball]
   cd $startDir
   set infoScript [

@@ -17,7 +17,7 @@ source [file join $LibDir "compiler.tcl"]
 namespace import ::tarcel::tar
 
 
-test parse-tarcel-1 {Ensure that tarcel will use a tarcel manifesto to tarcel files relative to the manifest file and add it to the tarcel} -setup {
+test parse-tarcel-1 {Ensure that tarcel will use a .tarcel to package files relative to the .tarcel file and add it to the tarcel} -setup {
   set startDir [pwd]
   cd $FixturesDir
 
@@ -49,7 +49,7 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
   set startDir [pwd]
   cd $FixturesDir
 
-  set manifest {
+  set dotTarcel {
     tarcel modules [file join eater eater.tarcel]
 
     config set init {
@@ -58,7 +58,7 @@ test parse-tarcel-2 {Ensure that when using tarcel to create a tarcel that the r
     }
   }
   set config [::tarcel::Config new]
-  set configSettings [$config parse $manifest]
+  set configSettings [$config parse $dotTarcel]
   set archive [dict get $configSettings archive]
   set eaterScript [$archive read [file join modules eater-0.1.tm]]
 } -body {

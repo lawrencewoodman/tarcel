@@ -21,7 +21,7 @@ test compile-1 {Ensure that you can access the files in the tarcel from the init
   set startDir [pwd]
   cd $FixturesDir
 
-  set manifest {
+  set dotTarcel {
     set appFiles [list \
       [file join eater eater.tcl] \
       [file join eater lib foodplurals.tcl]
@@ -35,7 +35,7 @@ test compile-1 {Ensure that you can access the files in the tarcel from the init
     }
   }
   set config [::tarcel::Config new]
-  lassign [compiler::compile [$config parse $manifest]] startScript tarball
+  lassign [compiler::compile [$config parse $dotTarcel]] startScript tarball
   set tempFilename [TestHelpers::writeTarcelToTempFile $startScript $tarball]
   set int [interp create]
 } -body {
