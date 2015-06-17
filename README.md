@@ -70,7 +70,7 @@ In addition it has the following commands to control packaging:
   <dt>import importPoint files</dt>
   <dd>Gets the specified <em>files</em> and places them at the directory specified by <em>importPoint</em> in the package relative to their original directory structure.</dd>
 
-  <dt>find module [requirements]</dt>
+  <dt>find module [requirement] ...</dt>
   <dd>Find the location of a Tcl module.  You can also specify the version requirements for the module.</dd>
 
   <dt>get packageLoadCommands packageName</dt>
