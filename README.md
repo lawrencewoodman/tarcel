@@ -2,7 +2,7 @@ tarcel
 ======
 A Tcl packaging tool
 
-Tarcel allows you to combine a number of files together to create a single tarcel file that can ben run by tclsh, wish, or can be sourced into another tcl script.  This makes it easy to distribute your applications as a single file.  In addition it allows you to easily create Tcl modules made-up of several files including shared libraries, and then take advantage of the extra benefits that Tcl modules provide such as faster loading time.
+Tarcel allows you to combine a number of files together to create a single tarcel file that can ben run by tclsh, wish, or can be sourced into another Tcl script.  This makes it easy to distribute your applications as a single file.  In addition it allows you to easily create Tcl modules made up of several files including shared libraries, and then take advantage of the extra benefits that Tcl modules provide such as faster loading time.
 
 Requirements
 ------------
@@ -96,7 +96,7 @@ Using the supplied _tarcel.tarcel_ file as an example.  We first define the file
       [file join lib embeddedchan.tcl]
     ]
 
-Then define the modules it requires.  In this case it needs the `configurator` module and uses `find module` to located it.
+Then define the modules it requires.  In this case it needs the `configurator` module and uses `find module` to locate it.
 
     set modules [list \
       [find module configurator]
