@@ -2,7 +2,7 @@ tarcel
 ======
 A Tcl packaging tool
 
-Tarcel allows you to combine a number of files together to create a single tarcel file that can ben run by tclsh, wish, or can be sourced into another tcl script.
+Tarcel allows you to combine a number of files together to create a single tarcel file that can ben run by tclsh, wish, or can be sourced into another tcl script.  This makes it easy to distribute your applications as a single file.  In addition it allows you to easily create Tcl modules made-up of several files including shared libraries, and then take advantage of the extra benefits that Tcl modules provide such as faster loading time.
 
 Requirements
 ------------
