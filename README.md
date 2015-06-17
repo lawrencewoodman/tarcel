@@ -41,6 +41,45 @@ To find out some information about a package use the <em>info</em> command of <e
 ### Defining a .tarcel File ###
 To begin with it is worth looking at the <em>tarcel.tarcel</em> file supplied in the repo.  This <em>.tarcel</em> file is used to wrap <em>tarcel.tcl</em>.
 
+A <em>.tarcel</em> file is a Tcl script which has the following Tcl commands available to it:
+
+* file (only supports subcommands: dirname, join and tail)
+* foreach
+* glob
+* if
+* lassign
+* list
+* llength
+* lsort
+* regexp
+* regsub
+* set
+* string
+
+In addition it has the following commands to control packaging:
+<dl>
+  <dt>config set varName value</dt>
+  <dd>Sets variables such as <em>version</em>, <em>homepage</em> and <em>init</em>.  The latter is used to set the initialization code for the package to load the rest of the code.</dd>
+
+  <dt>error msg</dt>
+  <dd>Quit processing a <em>.tarcel</em> with an error message.</dd>
+
+  <dt>fetch importPoint files</dt>
+  <dd>Gets the specified <em>files</em> and places them all at the directory specified by <em>importPoint</em> in the package.  The relative directory structure of the files will not be preserved.</dd>
+
+  <dt>import importPoint files</dt>
+  <dd>Gets the specified <em>files</em> and places them at the directory specified by <em>importPoint</em> in the package relative to their original directory structure.</dd>
+
+  <dt>find module [requirements]</dt>
+  <dd>Find the location of a Tcl module.  You can also specify the version requirements for the module.</dd>
+
+  <dt>get packageLoadCommands packageName</dt>
+  <dd>Returns the commands to load the package from <code>package ifneeded</code>.</dd>
+
+  <dt>tarcel destination .tarcelFile [arg] ...</dt>
+  <dd>Use the <em>.tarcelFile</em> file to package some other code and include the resulting <em>tarcel</em> file at destination in the calling <em>tarcel</em> file.  If you pass any further arguments, then the Tcl variable <code>args</code> will be set with these.</dd>
+</dl>
+
 Contributions
 -------------
 If you want to improve this program make a pull request to the [repo](https://github.com/LawrenceWoodman/tarcel) on github.  Please put any pull requests in a separate branch to ease integration and add a test to prove that it works.
