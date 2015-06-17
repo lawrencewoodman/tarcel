@@ -5,9 +5,6 @@
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
 
-namespace import ::tarcel::tar
-namespace import ::tarcel::xplatform::*
-
 ::oo::class create ::tarcel::TarArchive {
   variable files
 
@@ -17,10 +14,10 @@ namespace import ::tarcel::xplatform::*
 
 
   method load {tarball} {
-    set filenames [tar getFilenames $tarball]
+    set filenames [::tarcel::tar getFilenames $tarball]
 
     foreach filename $filenames {
-      dict set files $filename [tar getFile $tarball $filename]
+      dict set files $filename [::tarcel::tar getFile $tarball $filename]
     }
   }
 
@@ -65,22 +62,24 @@ namespace import ::tarcel::xplatform::*
 
 
   method export {} {
-    tar create $files
+    ::tarcel::tar create $files
   }
 
 
   method ls {} {
-    lmap filename [dict keys $files] {unixToLocalFilename $filename}
+    lmap filename [dict keys $files] {
+      ::tarcel::xplatform::unixToLocalFilename $filename
+    }
   }
 
 
   method exists {filename} {
-    dict exists $files [toUnixFilename $filename]
+    dict exists $files [::tarcel::xplatform::toUnixFilename $filename]
   }
 
 
   method read {filename} {
-    dict get $files [toUnixFilename $filename]
+    dict get $files [::tarcel::xplatform::toUnixFilename $filename]
   }
 
 
