@@ -94,7 +94,7 @@ namespace import configurator::*
   }
 
   method Config {interp command args} {
-    set invalidVarnames {archive}
+    set validVarnames {homepage init outputFilename version}
     switch $command {
       set {
         if {[llength $args] != 2} {
@@ -102,7 +102,7 @@ namespace import configurator::*
                  "wrong # of arguments, should be: config set varName value"
         }
         lassign $args varName value
-        if {$varName in $invalidVarnames} {
+        if {$varName ni $validVarnames} {
           return -code error "invalid variable for config set: $varName"
         }
         dict set config $varName $value

@@ -127,4 +127,34 @@ test parse-find-module-1 {Ensure that requirements can be used to find module} -
 } -result {I'm number 0.2.5}
 
 
+test parse-config-set-1 {Ensure that can set valid varNames} -setup {
+  set dotTarcel {
+    config set homepage "http://example.com"
+    config set version 0.1
+    config set outputFilename "myApp.tcl"
+    config set init {puts "hello"}
+  }
+  set config [::tarcel::Config new]
+} -body {
+  set configSettings [$config parse $dotTarcel]
+  dict create homepage [dict get $configSettings homepage] \
+              version [dict get $configSettings version] \
+              init [dict get $configSettings init]
+} -result [dict create homepage "http://example.com" \
+                       version 0.1 \
+                       init {puts "hello"}]
+
+
+test parse-config-set-2 {Ensure that will raise an error if invalid varName used} -setup {
+  set dotTarcel {
+    config set bob "hello my name is Bob"
+    config set version 0.1
+    config set init {puts "hello"}
+  }
+  set config [::tarcel::Config new]
+} -body {
+  $config parse $dotTarcel
+} -returnCodes {error} -result "invalid variable for config set: bob"
+
+
 cleanupTests
