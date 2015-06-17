@@ -132,7 +132,7 @@ Finally we set the script which will start the application.  Note that it adds t
 
 Contributions
 -------------
-If you want to improve this program make a pull request to the [repo](https://github.com/LawrenceWoodman/tarcel) on github.  Please put any pull requests in a separate branch to ease integration and add a test to prove that it works.
+If you want to improve this program make a pull request to the [repo](https://github.com/LawrenceWoodman/tarcel) on github.  Please put any pull requests in a separate branch to ease integration and add a test to prove that it works.  If you find a bug, please report it at the tarcel project's [issues tracker](https://github.com/LawrenceWoodman/tarcel/issues) also on github.
 
 Licence
 -------
