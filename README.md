@@ -43,40 +43,40 @@ To begin with it is worth looking at the _tarcel.tarcel_ file supplied in the re
 
 A _.tarcel_ file is a Tcl script which has the following Tcl commands available to it:
 
-* file (only supports subcommands: dirname, join and tail)
-* foreach
-* glob
-* if
-* lassign
-* list
-* llength
-* lsort
-* regexp
-* regsub
-* set
-* string
+* `file` (only supports subcommands: `dirname`, `join` and `tail`)
+* `foreach`
+* `glob`
+* `if`
+* `lassign`
+* `list`
+* `llength`
+* `lsort`
+* `regexp`
+* `regsub`
+* `set`
+* `string`
 
 In addition it has the following commands to control packaging:
 <dl>
-  <dt>config set varName value</dt>
+  <dt><code>config set varName value</code></dt>
   <dd>Sets variables such as <em>version</em>, <em>homepage</em> and <em>init</em>.  The latter is used to set the initialization code for the package to load the rest of the code.</dd>
 
-  <dt>error msg</dt>
+  <dt><code>error msg</code></dt>
   <dd>Quit processing a <em>.tarcel</em> with an error message.</dd>
 
-  <dt>fetch importPoint files</dt>
+  <dt><code>fetch importPoint files</code></dt>
   <dd>Gets the specified <em>files</em> and places them all at the directory specified by <em>importPoint</em> in the package.  The relative directory structure of the files will not be preserved.</dd>
 
-  <dt>import importPoint files</dt>
+  <dt><code>import importPoint files</code></dt>
   <dd>Gets the specified <em>files</em> and places them at the directory specified by <em>importPoint</em> in the package relative to their original directory structure.</dd>
 
-  <dt>find module [requirement] ...</dt>
+  <dt><code>find module [requirement] ...</code></dt>
   <dd>Find the location of a Tcl module.  You can also specify the version requirements for the module.</dd>
 
-  <dt>get packageLoadCommands packageName</dt>
+  <dt><code>get packageLoadCommands packageName</code></dt>
   <dd>Returns the commands to load the package from <code>package ifneeded</code>.</dd>
 
-  <dt>tarcel destination .tarcelFile [arg] ...</dt>
+  <dt><code>tarcel destination .tarcelFile [arg] ...</code></dt>
   <dd>Use the <em>.tarcelFile</em> file to package some other code and include the resulting <em>tarcel</em> file at destination in the calling <em>tarcel</em> file.  If you pass any further arguments, then the Tcl variable <code>args</code> will be set with these.</dd>
 </dl>
 
