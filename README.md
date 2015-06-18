@@ -38,6 +38,26 @@ To find out some information about a package use the _info_ command of _tarcel.t
 
     $ tclsh tarcel.tcl info t.tcl
 
+This will output something like the following:
+
+    Information for tarcel: t.tcl
+
+      Homepage: https://github.com/LawrenceWoodman/tarcel
+      Version: 0.1
+      Files:
+        tarcel-0.1.vfs/app/lib/commands.tcl
+        tarcel-0.1.vfs/app/lib/compiler.tcl
+        tarcel-0.1.vfs/app/lib/config.tcl
+        tarcel-0.1.vfs/app/lib/embeddedchan.tcl
+        tarcel-0.1.vfs/app/lib/parameters.tcl
+        tarcel-0.1.vfs/app/lib/tar.tcl
+        tarcel-0.1.vfs/app/lib/tararchive.tcl
+        tarcel-0.1.vfs/app/lib/tvfs.tcl
+        tarcel-0.1.vfs/app/lib/xplatform.tcl
+        tarcel-0.1.vfs/app/tarcel.tcl
+        tarcel-0.1.vfs/modules/configurator-0.1.tm
+
+
 ### Defining a .tarcel File ###
 To begin with it is worth looking at the _tarcel.tarcel_ file supplied in the repo.  This _.tarcel_ file is used to wrap _tarcel.tcl_.
 

@@ -125,7 +125,7 @@ proc displayInfo {tarcelFilename info} {
   if {[dict exists $info version]} {
     puts "  Version: [dict get $info version]"
   }
-  puts "  Filenames:"
+  puts "  Files:"
   foreach filename [dict get $info filenames] {
     puts "    $filename"
   }
