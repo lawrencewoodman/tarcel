@@ -94,6 +94,11 @@ proc wrap {dotTarcelFilename {outputFilename {}}} {
     }
   }
 
+  if {[file exists $outputFilename]} {
+    puts stderr "Error: output file already exists: $outputFilename"
+    exit 1
+  }
+
   lassign [compiler::compile $configSettings] startScript tarball
   cd $startDir
   set fd [open $outputFilename w]

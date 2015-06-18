@@ -60,4 +60,20 @@ test wrap-3 {Ensure that output file is relative to pwd} -setup {
 } -result 1
 
 
+test wrap-4 {Ensure that output file isn't created if it already exists} -setup {
+  set tempDir [TestHelpers::makeTempDir]
+
+  exec tclsh [file join $TarcelDir tarcel.tcl] wrap \
+             -o [file join $tempDir h.tcl] \
+             [file join $FixturesDir hello hello.tarcel]
+} -body {
+  try {
+    exec tclsh [file join $TarcelDir tarcel.tcl] wrap \
+               -o [file join $tempDir h.tcl] \
+               [file join $FixturesDir hello hello.tarcel]
+  } on error {result options} {}
+  regsub {^(Error:.*: )(.*)(tmp.*tarcel_tests)(_\d+)(/h.tcl)$} $result {\1\3\5}
+} -result "Error: output file already exists: [file join tmp tarcel_tests h.tcl]"
+
+
 cleanupTests
