@@ -80,7 +80,7 @@ In addition it has the following commands to control packaging:
   <dd>Use the <em>.tarcelFile</em> file to package some other code and include the resulting <em>tarcel</em> file at destination in the calling <em>tarcel</em> file.  If you pass any further arguments, then the Tcl variable <code>args</code> will be set with these.</dd>
 </dl>
 
-#### tarcel.tarcel ####
+#### Example: tarcel.tarcel ####
 Using the supplied _tarcel.tarcel_ file as an example.  We first define the files that make up the utility:
 
     set appFiles [list \
