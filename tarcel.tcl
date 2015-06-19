@@ -120,7 +120,7 @@ proc getInfo {tarcelFilename} {
 
 proc displayInfo {tarcelFilename info} {
   puts "Information for tarcel: $tarcelFilename"
-  puts "Created with tarcel version: [dict get $info tarcel_version]\n"
+  puts "Created with tarcel.tcl version: [dict get $info tarcel_version]\n"
   if {[dict exists $info homepage]} {
     puts "  Homepage: [dict get $info homepage]"
   }

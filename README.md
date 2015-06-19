@@ -41,7 +41,7 @@ To find out some information about a package use the _info_ command of _tarcel.t
 This will output something like the following:
 
     Information for tarcel: t.tcl
-    Created with tarcel version: 0.1
+    Created with tarcel.tcl version: 0.1
 
       Homepage: https://github.com/LawrenceWoodman/tarcel
       Version: 0.1
