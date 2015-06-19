@@ -21,7 +21,7 @@ source [file join $LibDir config.tcl]
 
 
 proc handleParameters {parameters} {
-     set usage ": tarcel.tcl command \[option\] ...\ncommands:\n"
+     set usage "Usage: tarcel.tcl command \[option\] ...\ncommands:\n"
   append usage "    wrap \[options\] <.tarcel filename>   - Wrap files using .tarcel file\n"
   append usage "    info <tarcel filename>    - Information about tarcel file\n"
   append usage "\n\n"
