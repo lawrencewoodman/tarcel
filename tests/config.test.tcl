@@ -8,6 +8,7 @@ set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
 
 source [file join $ThisScriptDir "test_helpers.tcl"]
+source [file join $LibDir "version.tcl"]
 source [file join $LibDir "xplatform.tcl"]
 source [file join $LibDir "tar.tcl"]
 source [file join $LibDir "tararchive.tcl"]

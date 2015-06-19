@@ -78,6 +78,8 @@ proc compiler::MakeInfo {config} {
     }
   }
 
+  dict set info tarcel_version $::tarcel::version
+
   return $info
 }
 

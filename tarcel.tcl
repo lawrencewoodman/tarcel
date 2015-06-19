@@ -16,6 +16,7 @@ if {![namespace exists ::tarcel::tvfs]} {
   source [file join $LibDir tararchive.tcl]
 }
 
+source [file join $LibDir version.tcl]
 source [file join $LibDir compiler.tcl]
 source [file join $LibDir config.tcl]
 
@@ -118,7 +119,8 @@ proc getInfo {tarcelFilename} {
 
 
 proc displayInfo {tarcelFilename info} {
-  puts "Information for tarcel: $tarcelFilename\n"
+  puts "Information for tarcel: $tarcelFilename"
+  puts "Created with tarcel version: [dict get $info tarcel_version]\n"
   if {[dict exists $info homepage]} {
     puts "  Homepage: [dict get $info homepage]"
   }

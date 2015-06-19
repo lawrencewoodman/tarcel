@@ -8,6 +8,7 @@ set FixturesDir [file normalize [file join $ThisScriptDir fixtures]]
 
 
 source [file join $ThisScriptDir "test_helpers.tcl"]
+source [file join $LibDir "version.tcl"]
 source [file join $LibDir "xplatform.tcl"]
 source [file join $LibDir "tar.tcl"]
 source [file join $LibDir "tararchive.tcl"]
@@ -58,16 +59,14 @@ test info-1 {Ensure lists files in tarcel} -setup {
   set int [interp create]
   $int eval info script [info script]
 } -body {
-  $int eval $infoScript
+  dict get [$int eval $infoScript] filenames
 } -cleanup {
   interp delete $int
   cd $startDir
 } -result [
-  dict create filenames [
-    list lib/eater/eater.tcl \
-         lib/eater/lib/foodplurals.tcl \
-         modules/configurator-0.1.tm
-  ]
+  list lib/eater/eater.tcl \
+       lib/eater/lib/foodplurals.tcl \
+       modules/configurator-0.1.tm
 ]
 
 
@@ -159,6 +158,51 @@ test info-3 {Ensure lists version set in tarcel} -setup {
   interp delete $int
   cd $startDir
 } -result {0.1}
+
+
+test info-4 {Ensure lists version of tarcel.tcl that created tarcel} -setup {
+  set startDir [pwd]
+  cd $FixturesDir
+
+  set dotTarcel {
+    set appFiles [list \
+      [file join eater eater.tcl] \
+      [file join eater lib foodplurals.tcl]
+    ]
+    config set version 0.2
+    import [file join lib] $appFiles
+
+    config set init {
+      source [file join lib eater eater.tcl]
+      eat orange
+    }
+  }
+
+  set infoScript {
+    set ThisDir [file dirname [info script]]
+    set LibDir [file join $ThisDir .. lib]
+    source [file join $LibDir xplatform.tcl]
+    source [file join $LibDir tar.tcl]
+    set tarball [::tarcel::tar::extractTarballFromFile @tempFilename]
+    eval [::tarcel::tar::getFile $tarball lib/commands.tcl]
+    ::tarcel::commands::info $tarball
+  }
+
+  set config [::tarcel::Config new]
+  lassign [compiler::compile [$config parse $dotTarcel]] startScript tarball
+  set tempFilename [TestHelpers::writeTarcelToTempFile $startScript $tarball]
+  cd $startDir
+  set infoScript [
+    string map [list @tempFilename $tempFilename] $infoScript
+  ]
+  set int [interp create]
+  $int eval info script [info script]
+} -body {
+  dict get [$int eval $infoScript] tarcel_version
+} -cleanup {
+  interp delete $int
+  cd $startDir
+} -result $::tarcel::version
 
 
 cleanupTests
