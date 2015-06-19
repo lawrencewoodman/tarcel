@@ -1,4 +1,4 @@
-# Tarball handling funcitons
+# Tarball handling functions
 #
 # Copyright (C) 2015 Lawrence Woodman <lwoodman@vlifesystems.com>
 #
