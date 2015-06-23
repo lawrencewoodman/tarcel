@@ -101,56 +101,6 @@ In addition it has the following commands to control packaging:
   <dd>Use the <em>.tarcelFile</em> file to package some other code and include the resulting <em>tarcel</em> file at destination in the calling <em>tarcel</em> file.  If you pass any further arguments, then the Tcl variable <code>args</code> will be set with these.</dd>
 </dl>
 
-#### Example: tarcel.tarcel ####
-Using the supplied _tarcel.tarcel_ file in the [repo](https://github.com/LawrenceWoodman/tarcel) as an example.  We first define the files that make up the utility:
-
-    set appFiles [list \
-      tarcel.tcl \
-      [file join lib commands.tcl] \
-      [file join lib parameters.tcl] \
-      [file join lib xplatform.tcl] \
-      [file join lib config.tcl] \
-      [file join lib compiler.tcl] \
-      [file join lib tvfs.tcl] \
-      [file join lib tar.tcl] \
-      [file join lib tararchive.tcl] \
-      [file join lib embeddedchan.tcl]
-    ]
-
-Then define the modules it requires.  In this case it needs the `configurator` module and uses `find module` to locate it.
-
-    set modules [list \
-      [find module configurator]
-    ]
-
-We set `version` and `baseDir` for use later in the script.  `baseDir` will be the root of the _tarcel_ to which all other files in the _tarcel_ will be relative to.
-
-    set version 0.1
-    set baseDir tarcel-$version.vfs
-
-Now we can import the files defined above for the utility and put them in the `app` directory off of `$baseDir` while keeping their relative directory structure.
-
-    import [file join $baseDir app] $appFiles
-
-And fetch the modules defined above and place them directly in the `modules` directory off of `$baseDir` without keeping any relative directory structure.
-
-    fetch [file join $baseDir modules] $modules
-
-We'll set the `version` and `homepage` within the config to provide useful information via the `info` command of `tarcel.tcl`.
-
-    config set version $version
-    config set homepage "https://github.com/LawrenceWoodman/tarcel"
-
-Finally we set the script which will start the application.  Note that it adds the modules directory to the list of paths that are searched for modules.
-
-    set initScript {
-      ::tcl::tm::path add [file join @baseDir modules]
-      source [file join @baseDir app tarcel.tcl]
-    }
-
-    config set init [string map [list @baseDir $baseDir] $initScript]
-
-
 Contributions
 -------------
 If you want to improve this program make a pull request to the [repo](https://github.com/LawrenceWoodman/tarcel) on github.  Please put any pull requests in a separate branch to ease integration and add a test to prove that it works.  If you find a bug, please report it at the tarcel project's [issues tracker](https://github.com/LawrenceWoodman/tarcel/issues) also on github.
