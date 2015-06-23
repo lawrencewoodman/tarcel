@@ -80,7 +80,7 @@ A _.tarcel_ file is a Tcl script which has the following Tcl commands available 
 In addition it has the following commands to control packaging:
 <dl>
   <dt><code>config set varName value</code></dt>
-  <dd>Sets variables such as <em>version</em>, <em>homepage</em> and <em>init</em>.  The latter is used to set the initialization code for the package to load the rest of the code.</dd>
+  <dd>Sets variables such as <em>version</em>, <em>homepage</em>, <em>outputFilename</em> and <em>init</em>.  The latter is used to set the initialization code for the package to load the rest of the code.</dd>
 
   <dt><code>error msg</code></dt>
   <dd>Quit processing a <em>.tarcel</em> with an error message.</dd>
