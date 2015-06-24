@@ -195,13 +195,35 @@ namespace import configurator::*
 
   method GetPackageLoadCommands {args} {
     lassign $args packageName
-    {*}[package unknown] $packageName
-    set versions [package versions $packageName]
-    if {[llength $versions] == 0} {
+    set requirements [lrange $args 1 end]
+    set numVersions [package versions $packageName]
+    set validVersions [list]
+
+    # Keep trying to find all versions of package until no new ones found
+    while {1} {
+      {*}[package unknown] $packageName
+      set versions [package versions $packageName]
+      set newNumVersions [llength $versions]
+      if {$newNumVersions == $numVersions} {
+        break
+      }
+      set numVersions $newNumVersions
+    }
+    if {[llength $requirements] >= 1} {
+      foreach version $versions {
+        if {[package vsatisfies $version {*}$requirements]} {
+          lappend validVersions $version
+        }
+      }
+    } else {
+      set validVersions $versions
+    }
+
+    if {[llength $validVersions] == 0} {
       return {}
     }
-    set latestVersion [lindex $versions 0]
-    return [list [package ifneeded $packageName $latestVersion] $latestVersion]
+    set bestVersion [lindex [lsort -decreasing $validVersions] 0]
+    return [list [package ifneeded $packageName $bestVersion] $bestVersion]
   }
 
 }

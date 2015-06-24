@@ -91,10 +91,10 @@ In addition it has the following commands to control packaging:
   <dt><code>import importPoint files</code></dt>
   <dd>Gets the specified <em>files</em> and places them at the directory specified by <em>importPoint</em> in the package relative to their original directory structure.</dd>
 
-  <dt><code>find module [requirement] ...</code></dt>
+  <dt><code>find module moduleName [requirement] ...</code></dt>
   <dd>Find the location of a Tcl module.  You can also specify the version requirements for the module.</dd>
 
-  <dt><code>get packageLoadCommands packageName</code></dt>
+  <dt><code>get packageLoadCommands packageName [requirement] ...</code></dt>
   <dd>Returns the commands to load the package from <code>package ifneeded</code>.</dd>
 
   <dt><code>tarcel destination .tarcelFile [arg] ...</code></dt>

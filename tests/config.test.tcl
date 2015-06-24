@@ -128,6 +128,66 @@ test parse-find-module-1 {Ensure that requirements can be used to find module} -
 } -result {I'm number 0.2.5}
 
 
+test parse-get-packageLoadCommands-1 {Ensure that the latest version is used if no requirements given} -setup {
+  set dotTarcel {
+    set loadCommands [get packageLoadCommands number]
+    set latestLoadCommand [lsort -decreasing -index 0 $loadCommands]
+    lassign $latestLoadCommand loadCommand version
+
+    set sourceFilename [regsub {^(.*source -encoding [^ ]+ )([^ ]+.*?)$} $loadCommand {\2}]
+    fetch modules $sourceFilename
+
+    config set init {
+      source [file join modules number-0.4.tm]
+      number
+    }
+  }
+  ::tcl::tm::path add [file normalize $FixturesDir]
+  set config [::tarcel::Config new]
+  lassign [compiler::compile [$config parse $dotTarcel]] \
+          startScript \
+          tarball
+  set tempFilename [
+    TestHelpers::writeTarcelToTempFile $startScript $tarball
+  ]
+  set int [interp create]
+} -body {
+  $int eval source $tempFilename
+} -cleanup {
+  interp delete $int
+  ::tcl::tm::path remove [file normalize $FixturesDir]
+} -result {I'm number 0.4}
+
+
+test parse-get-packageLoadCommands-2 {Ensure that requirements can be used to find package} -setup {
+  set dotTarcel {
+    set loadCommands [get packageLoadCommands number 0.2-0.3]
+    lassign $loadCommands loadCommand version
+    set sourceFilename [regsub {^(.*source -encoding [^ ]+ )([^ ]+.*?)$} $loadCommand {\2}]
+    fetch modules $sourceFilename
+
+    config set init {
+      source [file join modules number-0.2.5.tm]
+      number
+    }
+  }
+  ::tcl::tm::path add [file normalize $FixturesDir]
+  set config [::tarcel::Config new]
+  lassign [compiler::compile [$config parse $dotTarcel]] \
+          startScript \
+          tarball
+  set tempFilename [
+    TestHelpers::writeTarcelToTempFile $startScript $tarball
+  ]
+  set int [interp create]
+} -body {
+  $int eval source $tempFilename
+} -cleanup {
+  interp delete $int
+  ::tcl::tm::path remove [file normalize $FixturesDir]
+} -result {I'm number 0.2.5}
+
+
 test parse-config-set-1 {Ensure that can set valid varNames} -setup {
   set dotTarcel {
     config set homepage "http://example.com"
