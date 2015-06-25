@@ -13,7 +13,7 @@ set appFiles [list \
 ]
 
 set modules [list \
-  [find module configurator]
+  [find module configurator 0.2]
 ]
 
 set version 0.1

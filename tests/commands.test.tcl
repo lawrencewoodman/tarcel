@@ -66,7 +66,7 @@ test info-1 {Ensure lists files in tarcel} -setup {
 } -result [
   list lib/eater/eater.tcl \
        lib/eater/lib/foodplurals.tcl \
-       modules/configurator-0.1.tm
+       modules/configurator-0.2.tm
 ]
 
 

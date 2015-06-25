@@ -7,7 +7,7 @@ Tarcel allows you to combine a number of files together to create a single tarce
 Requirements
 ------------
 *  Tcl 8.6
-*  [configurator](https://github.com/LawrenceWoodman/configurator_tcl) module
+*  [configurator](https://github.com/LawrenceWoodman/configurator_tcl) v0.2+ module
 
 
 Getting Started
