@@ -28,7 +28,19 @@ proc compiler::compile {args} {
   set mainTarball [$archive export]
   set initTarball [MakeInitTarball $mainTarball $config $incStartupCode]
 
-  set startScript [IncludeFile [file join $LibDir xplatform.tcl]]
+  set headerComment {#########################################################
+# This file is a tarcel created by Tarcel v@version
+# To find out more about Tarcel go to the project page:
+#   http://vlifesystems.com/projects/tarcel/
+#########################################################
+}
+
+  set headerComment [
+    string map [list @version $::tarcel::version] $headerComment
+  ]
+
+  set startScript $headerComment
+  append startScript [IncludeFile [file join $LibDir xplatform.tcl]]
   append startScript [IncludeFile [file join $LibDir tar.tcl]]
 
   append startScript {

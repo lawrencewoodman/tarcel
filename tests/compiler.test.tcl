@@ -145,4 +145,37 @@ test compile-3 {Ensure can 'package require' a module/tarcel that is made from a
 } -result {Welcome fred}
 
 
+test compile-4 {Ensure that a tarcel has a header to say that it is a tarcel} -setup {
+  set dotTarcel {
+    config set init {
+      puts "hello"
+    }
+  }
+  set config [::tarcel::Config new]
+  lassign [compiler::compile [$config parse $dotTarcel]] startScript tarball
+  set startScriptLines [split $startScript \n]
+  set header [list]
+  foreach startScriptLine $startScriptLines {
+    if {[string match {#*} $startScriptLine]} {
+      if {![string match {######*} $startScriptLine]} {
+        lappend header $startScriptLine
+      }
+    } else {
+      break;
+    }
+  }
+
+  set headerLinesLookingFor [list]
+  foreach headerLine $header {
+    if {[regexp {^#.*?Tarcel v\d+\.\d+.*?$} $headerLine] ||
+        [regexp {^#.*?project page.*?$} $headerLine] ||
+        [regexp {^#.*?vlifesystems.com/projects/tarcel.*?$} $headerLine]} {
+      lappend headerLinesLookingFor $headerLine
+    }
+  }
+} -body {
+  llength $headerLinesLookingFor
+} -result {3}
+
+
 cleanupTests
