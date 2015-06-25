@@ -16,7 +16,7 @@ set modules [list \
   [find module configurator 0.2]
 ]
 
-set version 0.1
+set version 0.2
 set baseDir tarcel-$version.vfs
 
 

@@ -41,22 +41,22 @@ To find out some information about a package use the _info_ command of _tarcel.t
 This will output something like the following:
 
     Information for tarcel: t.tcl
-    Created with tarcel.tcl version: 0.1
+    Created with tarcel.tcl version: 0.2
 
       Homepage: https://github.com/LawrenceWoodman/tarcel
-      Version: 0.1
+      Version: 0.2
       Files:
-        tarcel-0.1.vfs/app/lib/commands.tcl
-        tarcel-0.1.vfs/app/lib/compiler.tcl
-        tarcel-0.1.vfs/app/lib/config.tcl
-        tarcel-0.1.vfs/app/lib/embeddedchan.tcl
-        tarcel-0.1.vfs/app/lib/parameters.tcl
-        tarcel-0.1.vfs/app/lib/tar.tcl
-        tarcel-0.1.vfs/app/lib/tararchive.tcl
-        tarcel-0.1.vfs/app/lib/tvfs.tcl
-        tarcel-0.1.vfs/app/lib/xplatform.tcl
-        tarcel-0.1.vfs/app/tarcel.tcl
-        tarcel-0.1.vfs/modules/configurator-0.1.tm
+        tarcel-0.2.vfs/app/lib/commands.tcl
+        tarcel-0.2.vfs/app/lib/compiler.tcl
+        tarcel-0.2.vfs/app/lib/config.tcl
+        tarcel-0.2.vfs/app/lib/embeddedchan.tcl
+        tarcel-0.2.vfs/app/lib/parameters.tcl
+        tarcel-0.2.vfs/app/lib/tar.tcl
+        tarcel-0.2.vfs/app/lib/tararchive.tcl
+        tarcel-0.2.vfs/app/lib/tvfs.tcl
+        tarcel-0.2.vfs/app/lib/xplatform.tcl
+        tarcel-0.2.vfs/app/tarcel.tcl
+        tarcel-0.2.vfs/modules/configurator-0.2.tm
 
 
 ### Defining a .tarcel File ###

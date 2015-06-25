@@ -5,5 +5,5 @@
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
 namespace eval ::tarcel {
-  variable version 0.1
+  variable version 0.2
 }
