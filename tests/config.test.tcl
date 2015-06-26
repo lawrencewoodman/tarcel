@@ -98,6 +98,34 @@ test parse-tarcel-3 {Ensure that tarcel will allow you to pass arguments to args
 } -result {args: a b 5 6 c d}
 
 
+test parse-tarcel-4 {Ensure that tarcel's args is an empty list if not passed} -setup {
+  set startDir [pwd]
+  cd $FixturesDir
+
+  set dotTarcel {
+    tarcel modules [file join whatargs.tarcel]
+
+    config set init {
+      source [file join modules whatargs.tcl]
+      whatArgs
+    }
+  }
+  set config [::tarcel::Config new]
+  lassign [compiler::compile [$config parse $dotTarcel]] \
+          startScript \
+          tarball
+  set tempFilename [
+    TestHelpers::writeTarcelToTempFile $startScript $tarball
+  ]
+  set int [interp create]
+} -body {
+  $int eval source $tempFilename
+} -cleanup {
+  interp delete $int
+  cd $startDir
+} -result {args: }
+
+
 test parse-find-module-1 {Ensure that requirements can be used to find module} -setup {
   set dotTarcel {
     set modules [list \

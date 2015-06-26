@@ -64,7 +64,7 @@ namespace import configurator::*
   method Tarcel {interp destination dotTarcelFilename args} {
     set startDir [pwd]
     set fd [open $dotTarcelFilename r]
-    set dotTarcel "set args \[list {*}$args\]\n"
+    set dotTarcel "set args \[list $args\]\n"
     append dotTarcel [read $fd]
     close $fd
 
