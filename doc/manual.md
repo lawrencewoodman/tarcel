@@ -94,8 +94,8 @@ In addition it has the following commands to control packaging:
   <dt><code>find module moduleName [requirement] ...</code></dt>
   <dd>Find the location of a Tcl module.  You can also specify the version requirements for the module.</dd>
 
-  <dt></code>get packageLoadCommands packageName [requirement] ...</code></dt>
-  <dd>Returns the commands to load the package from </code>package ifneeded</code>. The result is returned as a two element list, the first element contains the load commands and the second element contains the version found.</dd>
+  <dt><code>get packageLoadCommands packageName [requirement] ...</code></dt>
+  <dd>Returns the commands to load the package from <code>package ifneeded</code>. The result is returned as a two element list, the first element contains the load commands and the second element contains the version found.</dd>
 
   <dt><code>tarcel destination .tarcelFile [arg] ...</code></dt>
   <dd>Use the <em>.tarcelFile</em> file to package some other code and include the resulting <em>tarcel</em> file at destination in the calling <em>tarcel</em> file.  If you pass any further arguments, then the Tcl variable <code>args</code> will be set with these.</dd>
