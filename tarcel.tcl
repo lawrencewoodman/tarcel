@@ -83,7 +83,12 @@ proc wrap {dotTarcelFilename {outputFilename {}}} {
   set startDir [pwd]
   cd [file dirname $dotTarcelFilename]
   set config [::tarcel::Config new]
-  set configSettings [$config load [file tail $dotTarcelFilename]]
+  try {
+    set configSettings [$config load [file tail $dotTarcelFilename]]
+  } on error {result options} {
+    puts stderr "Error in $dotTarcelFilename: $result"
+    exit 1
+  }
 
   if {$outputFilename eq {}} {
     if {[dict exists $configSettings outputFilename]} {
@@ -111,10 +116,15 @@ proc wrap {dotTarcelFilename {outputFilename {}}} {
 
 
 proc getInfo {tarcelFilename} {
-  set tarball [::tarcel::tar::extractTarballFromFile $tarcelFilename]
-  uplevel 1 [::tarcel::tar::getFile $tarball lib/commands.tcl]
-  set info [::tarcel::commands::info $tarball]
-  displayInfo $tarcelFilename $info
+  try {
+    set tarball [::tarcel::tar::extractTarballFromFile $tarcelFilename]
+    uplevel 1 [::tarcel::tar::getFile $tarball lib/commands.tcl]
+    set info [::tarcel::commands::info $tarball]
+    displayInfo $tarcelFilename $info
+  } on error {} {
+    puts stderr "Error: invalid tarcel file: $tarcelFilename"
+    exit 1
+  }
 }
 
 

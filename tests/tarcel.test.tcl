@@ -76,4 +76,47 @@ test wrap-4 {Ensure that output file isn't created if it already exists} -setup 
 } -result "Error: output file already exists: [file join tmp tarcel_tests h.tcl]"
 
 
+test wrap-5 {Ensure outputs an error if problem with .tarcel file} -setup {
+  set tempDir [TestHelpers::makeTempDir]
+} -body {
+  try {
+    exec tclsh [file join $TarcelDir tarcel.tcl] wrap \
+        -o [file join $tempDir invalid.tcl] \
+        [file join $FixturesDir invalid.tarcel]
+  } on error {result options} {}
+  set result
+} -result "Error in [file join $FixturesDir invalid.tarcel]: invalid command name \"sset\""
+
+
+test info-1 {Ensure that outputs an error if not a tarcel file} -setup {
+} -body {
+  try {
+    exec tclsh [file join $TarcelDir tarcel.tcl] info \
+               [file join $TarcelDir README.md]
+  } on error {result options} {}
+  set result
+} -result "Error: invalid tarcel file: [file join $TarcelDir README.md]"
+
+
+test info-2 {Ensure that output includes the tarcel version number that created a tarcel} -setup {
+  set tempDir [TestHelpers::makeTempDir]
+  exec tclsh [file join $TarcelDir tarcel.tcl] wrap \
+             -o [file join $tempDir t.tcl] \
+             tarcel.tarcel
+
+} -body {
+  set info [
+    exec tclsh [file join $TarcelDir tarcel.tcl] info \
+               [file join $tempDir t.tcl]
+  ]
+  set lines [split $info "\n"]
+  foreach line $lines {
+    if {[regexp {^Created with.*?arcel.*?version.*?\d+\.\d+.*?$} $line]} {
+      return 1
+    }
+  }
+  return 0
+} -result 1
+
+
 cleanupTests

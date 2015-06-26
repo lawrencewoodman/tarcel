@@ -1,0 +1,3 @@
+sset files {}
+
+config set init {puts "hello"}
