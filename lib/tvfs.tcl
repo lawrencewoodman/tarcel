@@ -253,7 +253,7 @@ namespace eval ::tarcel {
     try {
       set contents [read $filename]
       if {$contents eq {}} {
-        set fd [::open $filename r]
+        set fd [open $filename r]
         set contents [::read $fd]
         close $fd
       }
