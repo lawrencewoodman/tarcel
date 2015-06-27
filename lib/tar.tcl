@@ -154,7 +154,7 @@ namespace eval ::tarcel {
     append header [binary format "a$freeFilenameBytes" {}]
     append header [binary format a24 {}]
     append header "[format %-11o $filesize] "
-    append header [binary format a12 {}]
+    append header "[format %11o [clock seconds]] "
     append header "        "
     append header "0"
     append header [binary format a100 {}]
