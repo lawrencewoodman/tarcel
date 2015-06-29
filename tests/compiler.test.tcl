@@ -11,8 +11,10 @@ source [file join $ThisScriptDir "test_helpers.tcl"]
 source [file join $LibDir "version.tcl"]
 source [file join $LibDir "xplatform.tcl"]
 source [file join $LibDir "parameters.tcl"]
-source [file join $LibDir "tar.tcl"]
-source [file join $LibDir "tararchive.tcl"]
+source [file join $LibDir "tar.read.tcl"]
+source [file join $LibDir "tar.write.tcl"]
+source [file join $LibDir "tararchive.read.tcl"]
+source [file join $LibDir "tararchive.write.tcl"]
 source [file join $LibDir "embeddedchan.tcl"]
 source [file join $LibDir "config.tcl"]
 source [file join $LibDir "compiler.tcl"]
@@ -176,6 +178,30 @@ test compile-4 {Ensure that a tarcel has a header to say that it is a tarcel} -s
 } -body {
   llength $headerLinesLookingFor
 } -result {3}
+
+
+test compile-5 {Ensure that only files needed are included in startup tarball} -setup {
+  set dotTarcel {
+    config set init {
+      puts "hello"
+    }
+  }
+  set config [::tarcel::Config new]
+  lassign [compiler::compile [$config parse $dotTarcel]] startScript tarball
+} -body {
+  lsort [::tarcel::tar getFilenames $tarball]
+} -result [list \
+  [file join config info] \
+  [file join config init.tcl] \
+  [file join lib commands.tcl] \
+  [file join lib embeddedchan.tcl] \
+  [file join lib parameters.tcl] \
+  [file join lib tar.read.tcl] \
+  [file join lib tararchive.read.tcl] \
+  [file join lib tvfs.tcl] \
+  [file join lib xplatform.tcl] \
+  [file join main.tar]
+]
 
 
 cleanupTests

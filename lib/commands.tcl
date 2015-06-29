@@ -31,8 +31,8 @@ namespace eval ::tarcel {
       uplevel 1 [::tarcel::tar::getFile $tarball lib/parameters.tcl]
       uplevel 1 [::tarcel::tar::getFile $tarball lib/xplatform.tcl]
       uplevel 1 [::tarcel::tar::getFile $tarball lib/embeddedchan.tcl]
-      uplevel 1 [::tarcel::tar::getFile $tarball lib/tar.tcl]
-      uplevel 1 [::tarcel::tar::getFile $tarball lib/tararchive.tcl]
+      uplevel 1 [::tarcel::tar::getFile $tarball lib/tar.read.tcl]
+      uplevel 1 [::tarcel::tar::getFile $tarball lib/tararchive.read.tcl]
       uplevel 1 [::tarcel::tar::getFile $tarball lib/tvfs.tcl]
       ::tarcel::tvfs::init
     }

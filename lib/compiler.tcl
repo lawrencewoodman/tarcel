@@ -41,7 +41,7 @@ proc compiler::compile {args} {
 
   set startScript $headerComment
   append startScript [IncludeFile [file join $LibDir xplatform.tcl]]
-  append startScript [IncludeFile [file join $LibDir tar.tcl]]
+  append startScript [IncludeFile [file join $LibDir tar.read.tcl]]
 
   append startScript {
     namespace eval ::tarcel {
@@ -107,8 +107,8 @@ proc compiler::MakeInitTarball {mainTarball config includeStartupCode} {
       lib/parameters.tcl [ReadFile [file join $LibDir parameters.tcl]] \
       lib/xplatform.tcl [ReadFile [file join $LibDir xplatform.tcl]] \
       lib/embeddedchan.tcl [ReadFile [file join $LibDir embeddedchan.tcl]] \
-      lib/tar.tcl [ReadFile [file join $LibDir tar.tcl]] \
-      lib/tararchive.tcl [ReadFile [file join $LibDir tararchive.tcl]] \
+      lib/tar.read.tcl [ReadFile [file join $LibDir tar.read.tcl]] \
+      lib/tararchive.read.tcl [ReadFile [file join $LibDir tararchive.read.tcl]] \
       lib/tvfs.tcl [ReadFile [file join $LibDir tvfs.tcl]]
     ]
   } else {

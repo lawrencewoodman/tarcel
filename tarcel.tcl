@@ -12,13 +12,15 @@ set LibDir [file join $ThisScriptDir lib]
 if {![namespace exists ::tarcel::tvfs]} {
   source [file join $LibDir parameters.tcl]
   source [file join $LibDir xplatform.tcl]
-  source [file join $LibDir tar.tcl]
-  source [file join $LibDir tararchive.tcl]
+  source [file join $LibDir tar.read.tcl]
+  source [file join $LibDir tararchive.read.tcl]
 }
 
 source [file join $LibDir version.tcl]
 source [file join $LibDir compiler.tcl]
 source [file join $LibDir config.tcl]
+source [file join $LibDir tar.write.tcl]
+source [file join $LibDir tararchive.write.tcl]
 
 
 proc handleParameters {parameters} {

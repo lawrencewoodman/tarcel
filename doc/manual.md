@@ -51,8 +51,10 @@ This will output something like the following:
         tarcel-0.2.vfs/app/lib/config.tcl
         tarcel-0.2.vfs/app/lib/embeddedchan.tcl
         tarcel-0.2.vfs/app/lib/parameters.tcl
-        tarcel-0.2.vfs/app/lib/tar.tcl
-        tarcel-0.2.vfs/app/lib/tararchive.tcl
+        tarcel-0.2.vfs/app/lib/tar.read.tcl
+        tarcel-0.2.vfs/app/lib/tar.write.tcl
+        tarcel-0.2.vfs/app/lib/tararchive.read.tcl
+        tarcel-0.2.vfs/app/lib/tararchive.write.tcl
         tarcel-0.2.vfs/app/lib/tvfs.tcl
         tarcel-0.2.vfs/app/lib/xplatform.tcl
         tarcel-0.2.vfs/app/tarcel.tcl

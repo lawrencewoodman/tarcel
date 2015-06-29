@@ -111,8 +111,10 @@ proc TestHelpers::loadSourcesInInterp {interp} {
     source [file join $LibDir "parameters.tcl"]
     source [file join $LibDir "xplatform.tcl"]
     source [file join $LibDir "embeddedchan.tcl"]
-    source [file join $LibDir "tar.tcl"]
-    source [file join $LibDir "tararchive.tcl"]
+    source [file join $LibDir "tar.read.tcl"]
+    source [file join $LibDir "tar.write.tcl"]
+    source [file join $LibDir "tararchive.read.tcl"]
+    source [file join $LibDir "tararchive.write.tcl"]
     source [file join $LibDir "tvfs.tcl"]
   }
 }

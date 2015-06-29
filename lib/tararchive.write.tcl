@@ -1,26 +1,11 @@
-# Tar archive
+# Tar archive creating methods
 #
 # Copyright (C) 2015 Lawrence Woodman <lwoodman@vlifesystems.com>
 #
 # Licensed under an MIT licence.  Please see LICENCE.md for details.
 #
 
-::oo::class create ::tarcel::TarArchive {
-  variable files
-
-  constructor {} {
-    set files [dict create]
-  }
-
-
-  method load {tarball} {
-    set filenames [::tarcel::tar getFilenames $tarball]
-
-    foreach filename $filenames {
-      dict set files $filename [::tarcel::tar getFile $tarball $filename]
-    }
-  }
-
+::oo::define ::tarcel::TarArchive {
 
   method importFiles {_files importPoint} {
     foreach filename $_files {
@@ -63,23 +48,6 @@
 
   method export {} {
     ::tarcel::tar create $files
-  }
-
-
-  method ls {} {
-    lmap filename [dict keys $files] {
-      ::tarcel::xplatform::unixToLocalFilename $filename
-    }
-  }
-
-
-  method exists {filename} {
-    dict exists $files [::tarcel::xplatform::toUnixFilename $filename]
-  }
-
-
-  method read {filename} {
-    dict get $files [::tarcel::xplatform::toUnixFilename $filename]
   }
 
 
