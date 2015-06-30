@@ -41,24 +41,24 @@ To find out some information about a package use the _info_ command of _tarcel.t
 This will output something like the following:
 
     Information for tarcel: t.tcl
-    Created with tarcel.tcl version: 0.2
+    Created with tarcel.tcl version: 0.3
 
       Homepage: https://github.com/LawrenceWoodman/tarcel
-      Version: 0.2
+      Version: 0.3
       Files:
-        tarcel-0.2.vfs/app/lib/commands.tcl
-        tarcel-0.2.vfs/app/lib/compiler.tcl
-        tarcel-0.2.vfs/app/lib/config.tcl
-        tarcel-0.2.vfs/app/lib/embeddedchan.tcl
-        tarcel-0.2.vfs/app/lib/parameters.tcl
-        tarcel-0.2.vfs/app/lib/tar.read.tcl
-        tarcel-0.2.vfs/app/lib/tar.write.tcl
-        tarcel-0.2.vfs/app/lib/tararchive.read.tcl
-        tarcel-0.2.vfs/app/lib/tararchive.write.tcl
-        tarcel-0.2.vfs/app/lib/tvfs.tcl
-        tarcel-0.2.vfs/app/lib/xplatform.tcl
-        tarcel-0.2.vfs/app/tarcel.tcl
-        tarcel-0.2.vfs/modules/configurator-0.2.tm
+        tarcel-0.3.vfs/app/lib/commands.tcl
+        tarcel-0.3.vfs/app/lib/compiler.tcl
+        tarcel-0.3.vfs/app/lib/config.tcl
+        tarcel-0.3.vfs/app/lib/embeddedchan.tcl
+        tarcel-0.3.vfs/app/lib/parameters.tcl
+        tarcel-0.3.vfs/app/lib/tar.read.tcl
+        tarcel-0.3.vfs/app/lib/tar.write.tcl
+        tarcel-0.3.vfs/app/lib/tararchive.read.tcl
+        tarcel-0.3.vfs/app/lib/tararchive.write.tcl
+        tarcel-0.3.vfs/app/lib/tvfs.tcl
+        tarcel-0.3.vfs/app/lib/xplatform.tcl
+        tarcel-0.3.vfs/app/tarcel.tcl
+        tarcel-0.3.vfs/modules/configurator-0.2.tm
 
 
 ### Defining a .tarcel File ###
@@ -82,7 +82,7 @@ A _.tarcel_ file is a Tcl script which has the following Tcl commands available 
 In addition it has the following commands to control packaging:
 <dl>
   <dt><code>config set varName value</code></dt>
-  <dd>Sets variables such as <em>version</em>, <em>homepage</em>, <em>outputFilename</em> and <em>init</em>.  The latter is used to set the initialization code for the package to load the rest of the code.</dd>
+  <dd>Sets variables such as <em>version</em>, <em>hashbang</em>, <em>homepage</em>, <em>outputFilename</em> and <em>init</em>.  The latter is used to set the initialization code for the package to load the rest of the code.</dd>
 
   <dt><code>error msg</code></dt>
   <dd>Quit processing a <em>.tarcel</em> with an error message.</dd>
