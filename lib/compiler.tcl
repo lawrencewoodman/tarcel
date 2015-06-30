@@ -39,7 +39,12 @@ proc compiler::compile {args} {
     string map [list @version $::tarcel::version] $headerComment
   ]
 
-  set startScript $headerComment
+  set startScript ""
+  if {[dict exists $config hashbang]} {
+    append startScript "#![dict get $config hashbang]\n"
+  }
+
+  append startScript $headerComment
   append startScript [IncludeFile [file join $LibDir xplatform.tcl]]
   append startScript [IncludeFile [file join $LibDir tar.read.tcl]]
 

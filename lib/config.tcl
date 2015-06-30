@@ -94,7 +94,7 @@ namespace import configurator::*
   }
 
   method Config {interp command args} {
-    set validVarnames {homepage init outputFilename version}
+    set validVarnames {hashbang homepage init outputFilename version}
     switch $command {
       set {
         if {[llength $args] != 2} {

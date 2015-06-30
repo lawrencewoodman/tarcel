@@ -27,6 +27,7 @@ fetch [file join $baseDir modules] $modules
 
 config set version $version
 config set homepage "https://github.com/LawrenceWoodman/tarcel"
+config set hashbang "/usr/bin/env tclsh"
 
 set initScript {
   ::tcl::tm::path add [file join @baseDir modules]

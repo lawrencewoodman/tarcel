@@ -204,4 +204,35 @@ test compile-5 {Ensure that only files needed are included in startup tarball} -
 ]
 
 
+test compile-6 {Ensure that you can add a hashbang line} -setup {
+  set dotTarcel {
+    config set hashbang "/usr/bin/env tclsh"
+    config set init {
+      puts "hello"
+    }
+  }
+  set config [::tarcel::Config new]
+} -body {
+  lassign [compiler::compile [$config parse $dotTarcel]] startScript tarball
+  set startScriptLines [split $startScript \n]
+  lindex $startScriptLines 0
+} -result {#!/usr/bin/env tclsh}
+
+
+test compile-7 {Ensure that a hashbang line isn't added unless specified} -setup {
+  set dotTarcel {
+    config set hashbang "/usr/bin/env tclsh"
+    config set init {
+      puts "hello"
+    }
+  }
+  set config [::tarcel::Config new]
+} -body {
+  lassign [compiler::compile [$config parse $dotTarcel]] startScript tarball
+  set startScriptLines [split $startScript \n]
+  set firstLine [lindex $startScriptLines 0]
+  string match {#*} $firstLine
+} -result {1}
+
+
 cleanupTests

@@ -224,16 +224,21 @@ test parse-config-set-1 {Ensure that can set valid varNames} -setup {
     config set version 0.1
     config set outputFilename "myApp.tcl"
     config set init {puts "hello"}
+    config set hashbang {/usr/bin/env tclsh}
   }
   set config [::tarcel::Config new]
 } -body {
   set configSettings [$config parse $dotTarcel]
   dict create homepage [dict get $configSettings homepage] \
               version [dict get $configSettings version] \
-              init [dict get $configSettings init]
+              init [dict get $configSettings init] \
+              outputFilename [dict get $configSettings outputFilename] \
+              hashbang [dict get $configSettings hashbang]
 } -result [dict create homepage "http://example.com" \
                        version 0.1 \
-                       init {puts "hello"}]
+                       init {puts "hello"} \
+                       outputFilename "myApp.tcl" \
+                       hashbang {/usr/bin/env tclsh}]
 
 
 test parse-config-set-2 {Ensure that will raise an error if invalid varName used} -setup {
