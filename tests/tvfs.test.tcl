@@ -822,6 +822,94 @@ test glob-8 {Ensure that glob will allow -type switch for real fs} -setup {
 } -result {. .. fixtures}
 
 
+test glob-9 {Ensure that glob -directory works with -type/-types to return only files} -setup {
+  set int [interp create]
+  TestHelpers::loadSourcesInInterp $int
+  $int eval {
+    set mainScript {
+      hellofred
+    }
+    set fredScript {
+      proc hellofred {} {
+        return "hello fred"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $fredScript \
+                            [file join lib app module fred.tcl]
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
+  }
+} -body {
+  $int eval {
+    list [glob -directory [file join lib app] -type f *] \
+         [glob -directory [file join lib app] -types {f} *]
+  }
+} -cleanup {
+  interp delete $int
+} -result [list [list [file join lib app main.tcl]] \
+                [list [file join lib app main.tcl]]]
+
+
+test glob-10 {Ensure that glob -directory works with -type/-types to return only directories} -setup {
+  set int [interp create]
+  TestHelpers::loadSourcesInInterp $int
+  $int eval {
+    set mainScript {
+      hellofred
+    }
+    set fredScript {
+      proc hellofred {} {
+        return "hello fred"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $fredScript \
+                            [file join lib app module fred.tcl]
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
+  }
+} -body {
+  $int eval {
+    list [glob -directory [file join lib app] -type d *] \
+         [glob -directory [file join lib app] -types {d} *]
+  }
+} -cleanup {
+  interp delete $int
+} -result [list [list [file join lib app module]] \
+                [list [file join lib app module]]]
+
+
+test glob-11 {Ensure that glob -directory works with -tails to return only the parts of filenames after the directory specified} -setup {
+  set int [interp create]
+  TestHelpers::loadSourcesInInterp $int
+  $int eval {
+    set mainScript {
+      hellofred
+    }
+    set fredScript {
+      proc hellofred {} {
+        return "hello fred"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $fredScript \
+                            [file join lib app module fred.tcl]
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
+  }
+} -body {
+  $int eval {
+    glob -directory [file join lib app] -tails *
+  }
+} -cleanup {
+  interp delete $int
+} -result {main.tcl module}
+
+
 if {![TestHelpers::makeLibWelcome]} {
   puts stderr "Skipping test load-1 as couldn't build libwelcome"
   skip load-1

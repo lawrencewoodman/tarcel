@@ -302,43 +302,58 @@ namespace eval ::tarcel {
     set normalizedDirectory [oldFile normalize $directory]
     set result [list]
     set vFilenames [Ls]
+    set types {f d}
+
+    if {[dict exists $switches -type]} {
+      set types [list [dict get $switches -type]]
+    } elseif {[dict exists $switches -types]} {
+      set types [dict get $switches -types]
+    }
 
     # Files
-    foreach vFilename $vFilenames {
-      set vFilename [oldFile normalize $vFilename]
-      if {[oldFile dirname $vFilename] eq $normalizedDirectory} {
-        foreach pattern $patterns {
-          if {[string match $pattern [oldFile tail $vFilename]]} {
-            lappend result [file join $directory [oldFile tail $vFilename]]
+    if {"f" in $types} {
+      foreach vFilename $vFilenames {
+        set vFilename [oldFile normalize $vFilename]
+        if {[oldFile dirname $vFilename] eq $normalizedDirectory} {
+          foreach pattern $patterns {
+            if {[string match $pattern [oldFile tail $vFilename]]} {
+              lappend result [file join $directory [oldFile tail $vFilename]]
+            }
           }
         }
       }
     }
 
     # Directories
-    foreach vFilename $vFilenames {
-      set vFilename [oldFile normalize $vFilename]
-      set commonParts [GetCommonNameParts $vFilename $normalizedDirectory]
-      set nextPartVFilenameIndex [llength $commonParts]
-      set nextPartVFilename [
-        lindex [oldFile split $vFilename] $nextPartVFilenameIndex
-      ]
-      set vFilenameSplit [oldFile split $vFilename]
-      set isDirectory [
-        expr {$nextPartVFilenameIndex < [llength $vFilenameSplit] - 1}
-      ]
-      set dirName [oldFile join $directory $nextPartVFilename]
-      if {[lsearch $result $dirName] == -1 &&
-          $isDirectory &&
-          [llength $commonParts] >= 1} {
-        if {[oldFile join {*}$commonParts] eq $normalizedDirectory} {
-          foreach pattern $patterns {
-            if {[string match $pattern $nextPartVFilename]} {
-              lappend result $dirName
+    if {"d" in $types} {
+      foreach vFilename $vFilenames {
+        set vFilename [oldFile normalize $vFilename]
+        set commonParts [GetCommonNameParts $vFilename $normalizedDirectory]
+        set nextPartVFilenameIndex [llength $commonParts]
+        set nextPartVFilename [
+          lindex [oldFile split $vFilename] $nextPartVFilenameIndex
+        ]
+        set vFilenameSplit [oldFile split $vFilename]
+        set isDirectory [
+          expr {$nextPartVFilenameIndex < [llength $vFilenameSplit] - 1}
+        ]
+        set dirName [oldFile join $directory $nextPartVFilename]
+        if {[lsearch $result $dirName] == -1 &&
+            $isDirectory &&
+            [llength $commonParts] >= 1} {
+          if {[oldFile join {*}$commonParts] eq $normalizedDirectory} {
+            foreach pattern $patterns {
+              if {[string match $pattern $nextPartVFilename]} {
+                lappend result $dirName
+              }
             }
           }
         }
       }
+    }
+
+    if {[dict exists $switches -tails]} {
+      set result [lmap filename $result {oldFile tail $filename}]
     }
 
     return $result
