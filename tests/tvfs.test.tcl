@@ -548,6 +548,62 @@ test file-isfile-4 {Ensure that 'file isfile' handles file normalization} -setup
 } -result {1}
 
 
+test file-isdirectory-1 {Ensure that 'file isdirectory' returns 1 if a location is a directory} -setup {
+  set int [interp create]
+  TestHelpers::loadSourcesInInterp $int
+  $int eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
+  }
+} -body {
+  $int eval {
+    file isdirectory [file join lib modules]
+  }
+} -cleanup {
+  interp delete $int
+} -result {1}
+
+
+test file-isdirectory-2 {Ensure that 'file isdirectory' returns 0 if a location is a file} -setup {
+  set int [interp create]
+  TestHelpers::loadSourcesInInterp $int
+  $int eval {
+    set mainScript {
+      hello
+    }
+    set greeterInternalScript {
+      proc hello {} {
+        return "hello"
+      }
+    }
+    set archive [::tarcel::TarArchive new]
+    $archive importContents $mainScript [file join lib app main.tcl]
+    $archive importContents $greeterInternalScript \
+                            [file join lib modules greeterInternal-0.1.tm]
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
+  }
+} -body {
+  $int eval {
+    file isdirectory [file join lib modules greeterInternal-0.1.tm]
+  }
+} -cleanup {
+  interp delete $int
+} -result {0}
+
+
 test glob-1 {Ensure that glob -directory works on encoded files} -setup {
   set int [interp create]
   TestHelpers::loadSourcesInInterp $int

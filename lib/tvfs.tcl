@@ -124,6 +124,12 @@ namespace eval ::tarcel {
           return 1
         }
       }
+      isdirectory {
+        if {[llength $args] == 2 && [isdirectory [lindex $args 1]]} {
+          return 1
+        }
+      }
+
     }
     oldFile {*}$args
   }
@@ -204,6 +210,11 @@ namespace eval ::tarcel {
     }
     return 0
   }
+
+  proc tvfs::isdirectory {name} {
+    expr {[exists $name] && ![isfile $name]}
+  }
+
 
 #######################
 # Internal commands
