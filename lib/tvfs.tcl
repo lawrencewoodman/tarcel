@@ -47,15 +47,15 @@ namespace eval ::tarcel {
 
 
   proc tvfs::glob {args} {
-    set switchesWithValue {-directory -path -types}
-    set switchesWithoutValue {-join -nocomplain -tails}
+    set switchesWithValue {-directory -path -type -types}
+    set switchesWithoutValue {-join -nocomplain -tails --}
     set result [list]
 
-    lassign [::tarcel::parameters::getSwitches $switchesWithValue \
-                                               $switchesWithoutValue \
-                                               {*}$args] \
-            switches \
-            patterns
+    lassign [
+      ::tarcel::parameters::getSwitches $switchesWithValue \
+                                        $switchesWithoutValue \
+                                        {*}$args
+    ] switches patterns
 
     if {[dict exists $switches -directory]} {
       set directory [dict get $switches -directory]

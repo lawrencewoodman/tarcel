@@ -24,6 +24,10 @@ namespace eval ::tarcel {
         dict set switches $arg $nextArg
         incr argNum
       } elseif {$arg in $switchesWithoutValue} {
+        if {$arg eq "--"} {
+          incr argNum
+          break
+        }
         dict set switches $arg 1
       } else {
         return -code error "invalid switch"

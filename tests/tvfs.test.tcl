@@ -746,6 +746,26 @@ test glob-7 {Ensure that glob -directory doesn't repeat entries found in real fs
 } -result 1
 
 
+test glob-8 {Ensure that glob will allow -type switch for real fs} -setup {
+  set startDir [pwd]
+  set int [interp create]
+  TestHelpers::loadSourcesInInterp $int
+  $int eval {
+    set archive [::tarcel::TarArchive new]
+    ::tarcel::tvfs::init
+    ::tarcel::tvfs::mount $archive .
+  }
+  cd [file join $ThisScriptDir ..]
+} -body {
+  $int eval {
+    glob -tails -directory $ThisScriptDir -type d -nocomplain -- * .*
+  }
+} -cleanup {
+  interp delete $int
+  cd $startDir
+} -result {. .. fixtures}
+
+
 if {![TestHelpers::makeLibWelcome]} {
   puts stderr "Skipping test load-1 as couldn't build libwelcome"
   skip load-1
